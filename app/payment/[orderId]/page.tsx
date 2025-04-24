@@ -252,6 +252,29 @@ export default function PaymentPage({
       <div className="mb-6">
         <h2 className="font-semibold mb-4 text-lg">결제수단</h2>
         <div className="space-y-4">
+          <label className="flex items-center p-4 border rounded-lg bg-gray-50 relative">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="wooricard"
+              checked={paymentMethod === "wooricard"}
+              onChange={() => setPaymentMethod("wooricard")}
+              className="mr-3"
+            />
+            <div>
+              <p className="text-sm font-medium">우리페이</p>
+              <p className="text-xs text-gray-500">빠르고 간편한 우리페이 결제.</p>
+            </div>
+            <div className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-[#FFF8E8] text-[#FF6B35] text-xs px-2 py-1 rounded shadow">
+              최대 1,500원 적립
+            </div>
+          </label>
+          {paymentMethod === "wooricard" && (
+            <div className="mt-4 bg-[#FFF8E8] border border-[#FFD166] rounded-lg p-4 text-sm text-gray-700">
+              <p>첫 결제 시 포인트 <span className="font-bold text-[#FF6B35]">1,000원</span> 적립!</p>
+              <p>첫 결제일부터 6개월 동안 <span className="font-bold text-[#FF6B35]">0.5%</span> 추가 적립!</p>
+            </div>
+          )}
           <label className="flex items-center p-4 border rounded-lg bg-gray-50">
             <input
               type="radio"
@@ -264,20 +287,6 @@ export default function PaymentPage({
             <div>
               <p className="text-sm font-medium">신용/체크카드</p>
               <p className="text-xs text-gray-500">모든 카드 결제가 가능합니다.</p>
-            </div>
-          </label>
-          <label className="flex items-center p-4 border rounded-lg bg-gray-50">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="wooricard"
-              checked={paymentMethod === "wooricard"}
-              onChange={() => setPaymentMethod("wooricard")}
-              className="mr-3"
-            />
-            <div>
-              <p className="text-sm font-medium">우리카드 간편결제</p>
-              <p className="text-xs text-gray-500">빠르고 간편한 우리카드 결제.</p>
             </div>
           </label>
         </div>
