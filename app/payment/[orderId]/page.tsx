@@ -251,7 +251,7 @@ export default function PaymentPage({
       {/* 결제 수단 선택 */}
       <div className="mb-6">
         <h2 className="font-semibold mb-4 text-lg">결제수단</h2>
-        <label className="flex flex-col space-y-3 p-4 border rounded-lg bg-gray-50 relative">
+        <label className="flex flex-col space-y-3 p-4 rounded-lg bg-gray-50">
           <div className="flex items-center">
             <input
               type="radio"
