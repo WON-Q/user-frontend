@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation"; // Import useParams
+
 import Link from "next/link";
+
+import { useRouter, useSearchParams } from "next/navigation"; 
 
 // 주문 정보 타입 정의
 interface OrderSummary {
@@ -55,9 +57,12 @@ const MOCK_ORDER: OrderSummary = {
 };
 
 export default function PaymentPage() {
+  const searchParams = useSearchParams();
+  const restaurantId = searchParams.get("restaurantId");
+  const tableId = searchParams.get("tableId");
   const router = useRouter();
-  const params = useParams(); // Use useParams to unwrap params
-  const orderId = params?.orderId; // Safely access orderId
+ 
+ 
 
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,43 +80,14 @@ export default function PaymentPage() {
   const [timeLeft, setTimeLeft] = useState(180); // 3분 타임아웃
 
   useEffect(() => {
-    if (!orderId) return; // Ensure orderId is available
-
-    // 실제로는 API 호출로 주문 정보 가져오기
-    // const fetchOrderDetails = async () => {
-    //   try {
-    //     const response = await fetch(`/api/orders/${params.orderId}`);
-    //     const data = await response.json();
-    //     setOrderSummary(data);
-    //   } catch (error) {
-    //     console.error('주문 정보를 불러오는 데 실패했습니다.', error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchOrderDetails();
-
-    // 더미 데이터로 테스트
-    setOrderSummary(MOCK_ORDER);
-    setLoading(false);
-
-    // 결제 타이머 설정 (3분)
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          // 시간 초과 시 처리
-          setPaymentError(
-            "결제 시간이 초과되었습니다. 장바구니로 돌아가 다시 시도해주세요."
-          );
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [orderId]);
+    if (!tableId) {
+      router.replace("/"); // Redirect to home if tableId is missing
+    } else {
+      // Use MOCK_ORDER and update tableId
+      setOrderSummary({ ...MOCK_ORDER, tableId });
+      setLoading(false);
+    }
+  }, [tableId, router]);
 
   // 입력 양식 변경 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,7 +133,7 @@ export default function PaymentPage() {
 
       // 결제 성공 시뮬레이션 (1초 대기 후 주문 상태 페이지로 이동)
       setTimeout(() => {
-        router.push(`/order/${params.orderId}/status`);
+        router.push(`/order/${orderSummary?.orderId}/status`);
       }, 1500);
     } catch (error) {
       console.error("결제 처리 중 오류가 발생했습니다.", error);
@@ -230,10 +206,10 @@ export default function PaymentPage() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
       <div className="mb-6">
-        <Link href={`/cart/${orderSummary.tableId}`} className="text-[#FF6B35]">
+        <Link href={`/restaurant/${restaurantId}/table/${orderSummary.tableId}/cart`} className="text-[#FF6B35]">
           &larr; 장바구니로 돌아가기
         </Link>
-        <h1 className="text-2xl font-bold mt-2">결제하기</h1>
+        <h1 className="text-2xl font-bold mt-2">주문하기</h1>
         <p className="text-sm text-gray-600">
           테이블 번호: {orderSummary.tableId} | 주문번호: {orderSummary.orderId}
         </p>
