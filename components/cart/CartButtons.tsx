@@ -1,6 +1,3 @@
-"use client";
-
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface CartButtonsProps {
@@ -8,13 +5,10 @@ interface CartButtonsProps {
   tableId: string;
 }
 
-export default function CartButtons({ restaurantId, tableId }: CartButtonsProps) {
-  const router = useRouter();
-
-  const handleOrderClick = () => {
-    router.push(`/payment?restaurantId=${restaurantId}&tableId=${tableId}`);
-  };
-
+export default function CartButtons({
+  restaurantId,
+  tableId,
+}: CartButtonsProps) {
   return (
     <div className="sticky bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200 p-4 flex gap-3 safe-area-bottom z-[100] max-w-screen-md mx-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
       <Link
@@ -35,8 +29,8 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
         </svg>
         메뉴 추가
       </Link>
-      <button
-        onClick={handleOrderClick}
+      <Link
+       href={`/payment/1?restaurantId=${restaurantId}&tableId=${tableId}`}
         className="flex-1 h-12 bg-[var(--color-primary)] text-white rounded-xl shadow-md flex items-center justify-center font-medium transition-all hover:bg-[var(--color-primary-dark)] active:scale-[0.98]"
       >
         <svg
@@ -52,7 +46,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
           />
         </svg>
         주문하기
-      </button>
+      </Link>
     </div>
   );
 }

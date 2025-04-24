@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import NavBar from "@/components/navbar/NavBar";
 import CartItem from "@/components/cart/CartItem";
-import CartSummary from "@/components/cart/CartSummary";
+
 import EmptyCart from "@/components/cart/EmptyCart";
 import CartButtons from "@/components/cart/CartButtons";
 import { useCart } from "@/context/CartContext";
@@ -13,6 +13,7 @@ export default function CartPage({
 }: {
   params: { restaurantId: string; tableId: string };
 }) {
+  const { restaurantId, tableId } = params; // Extract restaurantId and tableId
   const {
     items,
     totalItems,
@@ -27,7 +28,7 @@ export default function CartPage({
     // 초기 로딩 시뮬레이션
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, []);
@@ -62,18 +63,13 @@ export default function CartPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white">
-      <NavBar storeName="장바구니" tableId={params.tableId} />
+      <NavBar storeName="장바구니" tableId={tableId} />
 
       <div className="flex-1 px-4 py-6">
         {items.length === 0 ? (
-          <EmptyCart
-            restaurantId={params.restaurantId}
-            tableId={params.tableId}
-          />
+          <EmptyCart restaurantId={restaurantId} tableId={tableId} />
         ) : (
           <>
-       
-
             {/* 장바구니 아이템 목록 */}
             <div className="mb-6">
               <h2 className="font-semibold text-lg text-gray-800 mb-3">
@@ -111,10 +107,9 @@ export default function CartPage({
               </button>
             </div>
 
-        
             <CartButtons
-              restaurantId={params.restaurantId}
-              tableId={params.tableId}
+              restaurantId={restaurantId}
+              tableId={tableId}
             />
           </>
         )}

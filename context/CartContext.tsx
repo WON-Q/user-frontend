@@ -33,6 +33,7 @@ interface CartProviderProps {
 
 export function CartProvider({ children, restaurantId, tableId }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [initialized, setInitialized] = useState(false); 
 
   // 로컬 스토리지에서 장바구니 데이터 로드
   useEffect(() => {
@@ -45,13 +46,16 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
         console.error('장바구니 데이터 로드 오류:', e);
       }
     }
+    setInitialized(true); // ✅ 데이터 로드 완료 후 초기화됨
   }, [restaurantId, tableId]);
 
-  // 장바구니 데이터가 변경될 때마다 로컬 스토리지에 저장
+  // 장바구니 데이터가 변경될 때만 로컬 스토리지에 저장
   useEffect(() => {
+    if (!initialized) return; // 초기화 전에는 저장하지 않음
+
     const cartKey = `cart_${restaurantId}_${tableId}`;
     localStorage.setItem(cartKey, JSON.stringify(items));
-  }, [items, restaurantId, tableId]);
+  }, [items, restaurantId, tableId, initialized]);
 
   const addItem = (menuItem: MenuItem, quantity: number, options?: { [key: string]: string }) => {
     setItems(currentItems => {
