@@ -250,30 +250,36 @@ export default function PaymentPage({
 
       {/* 결제 수단 선택 */}
       <div className="mb-6">
-        <h2 className="font-semibold mb-2">결제 수단 선택</h2>
-        <div className="flex space-x-2">
-          <button
-            type="button"
-            onClick={() => setPaymentMethod("card")}
-            className={`flex-1 py-2 px-4 border rounded ${
-              paymentMethod === "card"
-                ? "bg-[#FFF0E8] border-[#FF6B35]"
-                : "border-gray-300"
-            }`}
-          >
-            신용카드
-          </button>
-          <button
-            type="button"
-            onClick={() => setPaymentMethod("wooricard")}
-            className={`flex-1 py-2 px-4 border rounded ${
-              paymentMethod === "wooricard"
-                ? "bg-[#FFF0E8] border-[#FF6B35]"
-                : "border-gray-300"
-            }`}
-          >
-            우리카드 간편결제
-          </button>
+        <h2 className="font-semibold mb-4 text-lg">결제수단</h2>
+        <div className="space-y-4">
+          <label className="flex items-center p-4 border rounded-lg bg-gray-50">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="card"
+              checked={paymentMethod === "card"}
+              onChange={() => setPaymentMethod("card")}
+              className="mr-3"
+            />
+            <div>
+              <p className="text-sm font-medium">신용/체크카드</p>
+              <p className="text-xs text-gray-500">모든 카드 결제가 가능합니다.</p>
+            </div>
+          </label>
+          <label className="flex items-center p-4 border rounded-lg bg-gray-50">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="wooricard"
+              checked={paymentMethod === "wooricard"}
+              onChange={() => setPaymentMethod("wooricard")}
+              className="mr-3"
+            />
+            <div>
+              <p className="text-sm font-medium">우리카드 간편결제</p>
+              <p className="text-xs text-gray-500">빠르고 간편한 우리카드 결제.</p>
+            </div>
+          </label>
         </div>
       </div>
 
