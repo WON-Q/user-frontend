@@ -63,7 +63,7 @@ export default function PaymentPage({
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wooricard">(
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wooricard" | "tosspay" | "kakaopay">(
     "card"
   );
   const [formData, setFormData] = useState<PaymentFormData>({
@@ -271,6 +271,46 @@ export default function PaymentPage({
             <p>첫 결제 시 포인트 <span className="font-bold text-[#FF6B35]">1,000원</span> 적립!</p>
             <p>첫 결제일부터 6개월 동안 <span className="font-bold text-[#FF6B35]">0.5%</span> 추가 적립!</p>
           </div>
+          
+          <div className="flex items-center">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="tosspay"
+              checked={paymentMethod === "tosspay"}
+              onChange={() => setPaymentMethod("tosspay")}
+              className="mr-3"
+            />
+            <img
+              src="/toss.png"
+              alt="토스페이"
+              className="w-6 h-6 mr-2"
+            />
+            <div>
+              <p className="text-sm font-medium">토스페이</p>
+
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="kakaopay"
+              checked={paymentMethod === "kakaopay"}
+              onChange={() => setPaymentMethod("kakaopay")}
+              className="mr-3"
+            />
+            <img
+              src="/kakao.png"
+              alt="카카오페이"
+              className="w-6 h-6 mr-2"
+            />
+            <div>
+              <p className="text-sm font-medium">카카오페이</p>
+            </div>
+          </div>
+
           <div className="flex items-center">
             <input
               type="radio"
@@ -416,6 +456,64 @@ export default function PaymentPage({
             }`}
           >
             {processing ? "처리 중..." : "우리카드로 결제하기"}
+          </button>
+        </div>
+      )}
+
+      {paymentMethod === "tosspay" && (
+        <div>
+          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
+            <p className="text-sm">토스페이 간편결제를 선택하셨습니다.</p>
+            <p className="text-sm">
+              아래 버튼을 클릭하시면 토스페이 결제 페이지로 이동합니다.
+            </p>
+          </div>
+
+          {paymentError && (
+            <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
+              {paymentError}
+            </div>
+          )}
+
+          <button
+            onClick={handlePayment}
+            disabled={processing || timeLeft <= 0}
+            className={`w-full py-3 rounded-md font-medium text-white ${
+              processing || timeLeft <= 0
+                ? "bg-gray-400"
+                : "bg-[#FF6B35] hover:bg-[#C75000]"
+            }`}
+          >
+            {processing ? "처리 중..." : "토스페이로 결제하기"}
+          </button>
+        </div>
+      )}
+
+      {paymentMethod === "kakaopay" && (
+        <div>
+          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
+            <p className="text-sm">카카오페이 간편결제를 선택하셨습니다.</p>
+            <p className="text-sm">
+              아래 버튼을 클릭하시면 카카오페이 결제 페이지로 이동합니다.
+            </p>
+          </div>
+
+          {paymentError && (
+            <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
+              {paymentError}
+            </div>
+          )}
+
+          <button
+            onClick={handlePayment}
+            disabled={processing || timeLeft <= 0}
+            className={`w-full py-3 rounded-md font-medium text-white ${
+              processing || timeLeft <= 0
+                ? "bg-gray-400"
+                : "bg-[#FF6B35] hover:bg-[#C75000]"
+            }`}
+          >
+            {processing ? "처리 중..." : "카카오페이로 결제하기"}
           </button>
         </div>
       )}
