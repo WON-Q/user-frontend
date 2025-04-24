@@ -45,7 +45,7 @@ export default function CartButtons({
             clipRule="evenodd"
           />
         </svg>
-        결제하기
+        주문하기
       </Link>
     </div>
   );

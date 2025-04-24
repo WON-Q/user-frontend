@@ -124,7 +124,6 @@ export default function CartPage({
               </button>
             </div>
 
-            <CartSummary totalItems={totalItems} totalAmount={totalAmount} />
             <CartButtons
               restaurantId={params.restaurantId}
               tableId={params.tableId}
