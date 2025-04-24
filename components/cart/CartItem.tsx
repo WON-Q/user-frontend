@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CartItem } from "@/context/CartContext";
+import type { CartItem } from "../../context/CartContext"; // Use type-only import
 
 interface CartItemProps {
   item: CartItem;

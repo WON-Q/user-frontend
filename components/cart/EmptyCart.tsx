@@ -32,7 +32,7 @@ export default function EmptyCart({ restaurantId, tableId }: EmptyCartProps) {
             </p>
             <Link
                 href={`/restaurant/${restaurantId}/table/${tableId}/menu`}
-                className="px-6 py-3 bg-primary text-white rounded-lg shadow-md font-medium flex items-center"
+                className="px-6 py-3 bg-[#FF6B35] text-white rounded-[8px] shadow-md font-medium flex items-center transition-colors duration-200 hover:bg-[#C75000]"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

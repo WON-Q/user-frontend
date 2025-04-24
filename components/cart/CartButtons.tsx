@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 
 interface CartButtonsProps {
@@ -45,7 +46,7 @@ export default function CartButtons({
             clipRule="evenodd"
           />
         </svg>
-        주문하기
+        결제하기
       </Link>
     </div>
   );

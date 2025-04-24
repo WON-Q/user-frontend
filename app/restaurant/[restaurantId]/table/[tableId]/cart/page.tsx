@@ -72,20 +72,7 @@ export default function CartPage({
           />
         ) : (
           <>
-            {/* 테이블 정보 */}
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded-lg inline-flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1 text-gray-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M4 4a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2H4zm10 0a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2h-2zM4 14a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H4zm10 0a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z" />
-                </svg>
-                테이블 번호: {params.tableId}
-              </p>
-            </div>
+       
 
             {/* 장바구니 아이템 목록 */}
             <div className="mb-6">
@@ -124,6 +111,7 @@ export default function CartPage({
               </button>
             </div>
 
+        
             <CartButtons
               restaurantId={params.restaurantId}
               tableId={params.tableId}

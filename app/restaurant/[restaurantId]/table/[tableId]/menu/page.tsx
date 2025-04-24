@@ -327,7 +327,7 @@ export default function MenuPage({
 
       <div
         id="cartSuccess"
-        className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-success text-white px-4 py-2 rounded-lg shadow-lg opacity-0 translate-y-2 transition-all duration-300"
+        className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-[#FF6B35] text-white px-4 py-2 rounded-[8px] shadow-md opacity-0 translate-y-2 transition-all duration-300"
       >
         장바구니에 추가되었습니다
       </div>
