@@ -9,7 +9,7 @@ export default function NavBar({ storeName, tableId }: NavBarProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-            {/* Placeholder for store logo */}
+            {/* 가게 이미지지 */} 
             <img
               src="/images/store-logo.png"
               alt="Store Logo"
@@ -18,14 +18,13 @@ export default function NavBar({ storeName, tableId }: NavBarProps) {
           </div>
           <div>
             <h1 className="font-bold text-h2-mobile">{storeName}</h1>
-            <p className="text-caption text-text-light">강남역삼점</p>
           </div>
         </div>
         <div className="flex items-center">
           <div className="text-center bg-[#F0F4FF] px-3 py-1 rounded-lg">
             <p className="text-caption text-primary">테이블</p>
             <p className="text-h3 text-primary font-bold">
-              {tableId || "N/A"}
+              {tableId+"번" || "N/A"}
             </p>
           </div>
         </div>
