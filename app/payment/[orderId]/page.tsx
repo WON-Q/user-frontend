@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation"; // Import useParams
 import Link from "next/link";
 
 // 주문 정보 타입 정의
@@ -54,12 +54,11 @@ const MOCK_ORDER: OrderSummary = {
   orderDate: new Date(),
 };
 
-export default function PaymentPage({
-  params,
-}: {
-  params: { orderId: string };
-}) {
+export default function PaymentPage() {
   const router = useRouter();
+  const params = useParams(); // Use useParams to unwrap params
+  const orderId = params?.orderId; // Safely access orderId
+
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -76,6 +75,8 @@ export default function PaymentPage({
   const [timeLeft, setTimeLeft] = useState(180); // 3분 타임아웃
 
   useEffect(() => {
+    if (!orderId) return; // Ensure orderId is available
+
     // 실제로는 API 호출로 주문 정보 가져오기
     // const fetchOrderDetails = async () => {
     //   try {
@@ -110,7 +111,7 @@ export default function PaymentPage({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [params.orderId]);
+  }, [orderId]);
 
   // 입력 양식 변경 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,6 +174,39 @@ export default function PaymentPage({
       .toString()
       .padStart(2, "0")}`;
   };
+
+  // Reusable function for rendering payment method sections
+  const renderPaymentMethodSection = (
+    method: "wooricard" | "tosspay" | "kakaopay",
+    title: string,
+    description: string,
+    buttonText: string
+  ) => (
+    <div>
+      <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
+        <p className="text-sm">{title}</p>
+        <p className="text-sm">{description}</p>
+      </div>
+
+      {paymentError && (
+        <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
+          {paymentError}
+        </div>
+      )}
+
+      <button
+        onClick={handlePayment}
+        disabled={processing || timeLeft <= 0}
+        className={`w-full py-3 rounded-md font-medium text-white ${
+          processing || timeLeft <= 0
+            ? "bg-gray-400"
+            : "bg-[#FF6B35] hover:bg-[#C75000]"
+        }`}
+      >
+        {processing ? "처리 중..." : buttonText}
+      </button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -251,8 +285,8 @@ export default function PaymentPage({
       {/* 결제 수단 선택 */}
       <div className="mb-6">
         <h2 className="font-semibold mb-4 text-lg">결제수단</h2>
-        <label className="flex flex-col space-y-3 p-4 rounded-lg bg-gray-50">
-          <div className="flex items-center">
+        <div className="flex flex-col space-y-3 p-4 rounded-lg bg-gray-50">
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
@@ -265,14 +299,13 @@ export default function PaymentPage({
               <p className="text-sm font-medium">우리페이</p>
               <p className="text-xs text-gray-500">빠르고 간편한 우리페이 결제.</p>
             </div>
-          
-          </div>
+          </label>
           <div className="bg-[#FFF8E8] border border-[#FFD166] rounded-lg p-3 text-sm text-gray-700">
             <p>첫 결제 시 포인트 <span className="font-bold text-[#FF6B35]">1,000원</span> 적립!</p>
             <p>첫 결제일부터 6개월 동안 <span className="font-bold text-[#FF6B35]">0.5%</span> 추가 적립!</p>
           </div>
-          
-          <div className="flex items-center">
+
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
@@ -288,11 +321,10 @@ export default function PaymentPage({
             />
             <div>
               <p className="text-sm font-medium">토스페이</p>
-
             </div>
-          </div>
+          </label>
 
-          <div className="flex items-center">
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
@@ -302,16 +334,16 @@ export default function PaymentPage({
               className="mr-3"
             />
             <img
-              src="/kakao.png"
+              src="/kakao.svg"
               alt="카카오페이"
               className="w-6 h-6 mr-2"
             />
             <div>
               <p className="text-sm font-medium">카카오페이</p>
             </div>
-          </div>
+          </label>
 
-          <div className="flex items-center">
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
@@ -324,8 +356,8 @@ export default function PaymentPage({
               <p className="text-sm font-medium">신용/체크카드</p>
               <p className="text-xs text-gray-500">모든 카드 결제가 가능합니다.</p>
             </div>
-          </div>
-        </label>
+          </label>
+        </div>
       </div>
 
       {/* 결제 폼 */}
@@ -431,92 +463,16 @@ export default function PaymentPage({
         </form>
       )}
 
-      {paymentMethod === "wooricard" && (
-        <div>
-          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
-            <p className="text-sm">우리카드 간편결제를 선택하셨습니다.</p>
-            <p className="text-sm">
-              아래 버튼을 클릭하시면 우리카드 결제 페이지로 이동합니다.
-            </p>
-          </div>
-
-          {paymentError && (
-            <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
-              {paymentError}
-            </div>
-          )}
-
-          <button
-            onClick={handlePayment}
-            disabled={processing || timeLeft <= 0}
-            className={`w-full py-3 rounded-md font-medium text-white ${
-              processing || timeLeft <= 0
-                ? "bg-gray-400"
-                : "bg-[#FF6B35] hover:bg-[#C75000]"
-            }`}
-          >
-            {processing ? "처리 중..." : "우리카드로 결제하기"}
-          </button>
-        </div>
-      )}
-
-      {paymentMethod === "tosspay" && (
-        <div>
-          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
-            <p className="text-sm">토스페이 간편결제를 선택하셨습니다.</p>
-            <p className="text-sm">
-              아래 버튼을 클릭하시면 토스페이 결제 페이지로 이동합니다.
-            </p>
-          </div>
-
-          {paymentError && (
-            <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
-              {paymentError}
-            </div>
-          )}
-
-          <button
-            onClick={handlePayment}
-            disabled={processing || timeLeft <= 0}
-            className={`w-full py-3 rounded-md font-medium text-white ${
-              processing || timeLeft <= 0
-                ? "bg-gray-400"
-                : "bg-[#FF6B35] hover:bg-[#C75000]"
-            }`}
-          >
-            {processing ? "처리 중..." : "토스페이로 결제하기"}
-          </button>
-        </div>
-      )}
-
-      {paymentMethod === "kakaopay" && (
-        <div>
-          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
-            <p className="text-sm">카카오페이 간편결제를 선택하셨습니다.</p>
-            <p className="text-sm">
-              아래 버튼을 클릭하시면 카카오페이 결제 페이지로 이동합니다.
-            </p>
-          </div>
-
-          {paymentError && (
-            <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">
-              {paymentError}
-            </div>
-          )}
-
-          <button
-            onClick={handlePayment}
-            disabled={processing || timeLeft <= 0}
-            className={`w-full py-3 rounded-md font-medium text-white ${
-              processing || timeLeft <= 0
-                ? "bg-gray-400"
-                : "bg-[#FF6B35] hover:bg-[#C75000]"
-            }`}
-          >
-            {processing ? "처리 중..." : "카카오페이로 결제하기"}
-          </button>
-        </div>
-      )}
+      {/* 안내 문구 */}
+      {
+        ["wooricard", "tosspay", "kakaopay"].includes(paymentMethod) &&
+        renderPaymentMethodSection(
+          paymentMethod as "wooricard" | "tosspay" | "kakaopay",
+          `${paymentMethod === "wooricard" ? "우리카드" : paymentMethod === "tosspay" ? "토스페이" : "카카오페이"} 간편결제를 선택하셨습니다.`,
+          `아래 버튼을 클릭하시면 ${paymentMethod === "wooricard" ? "우리카드" : paymentMethod === "tosspay" ? "토스페이" : "카카오페이"} 결제 페이지로 이동합니다.`,
+          `${paymentMethod === "wooricard" ? "우리카드" : paymentMethod === "tosspay" ? "토스페이" : "카카오페이"}로 결제하기`
+        )
+      }
 
       <div className="mt-6 text-center text-xs text-gray-500">
         <p>원큐오더는 안전한 결제 환경을 제공합니다.</p>
