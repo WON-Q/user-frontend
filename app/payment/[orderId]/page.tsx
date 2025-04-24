@@ -186,7 +186,7 @@ export default function PaymentPage({
     return (
       <div className="container mx-auto px-4 py-6 text-center">
         <p>주문 정보를 찾을 수 없습니다.</p>
-        <Link href="/" className="text-blue-600 mt-4 inline-block">
+        <Link href="/" className="text-[#FF6B35] mt-4 inline-block">
           홈으로 돌아가기
         </Link>
       </div>
@@ -196,17 +196,17 @@ export default function PaymentPage({
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
       <div className="mb-6">
-        <Link href={`/cart/${orderSummary.tableId}`} className="text-blue-600">
+        <Link href={`/cart/${orderSummary.tableId}`} className="text-[#FF6B35]">
           &larr; 장바구니로 돌아가기
         </Link>
         <h1 className="text-2xl font-bold mt-2">결제하기</h1>
         <p className="text-sm text-gray-600">
           테이블 번호: {orderSummary.tableId} | 주문번호: {orderSummary.orderId}
         </p>
-        <div className="mt-2 text-sm bg-yellow-50 p-2 rounded flex items-center">
+        <div className="mt-2 text-sm bg-[#FFF8E8] p-2 rounded flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-yellow-500 mr-1"
+            className="h-5 w-5 text-[#FFD166] mr-1"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -257,7 +257,7 @@ export default function PaymentPage({
             onClick={() => setPaymentMethod("card")}
             className={`flex-1 py-2 px-4 border rounded ${
               paymentMethod === "card"
-                ? "bg-blue-50 border-blue-500"
+                ? "bg-[#FFF0E8] border-[#FF6B35]"
                 : "border-gray-300"
             }`}
           >
@@ -268,7 +268,7 @@ export default function PaymentPage({
             onClick={() => setPaymentMethod("wooricard")}
             className={`flex-1 py-2 px-4 border rounded ${
               paymentMethod === "wooricard"
-                ? "bg-blue-50 border-blue-500"
+                ? "bg-[#FFF0E8] border-[#FF6B35]"
                 : "border-gray-300"
             }`}
           >
@@ -370,7 +370,7 @@ export default function PaymentPage({
             className={`w-full py-3 rounded-md font-medium text-white ${
               processing || timeLeft <= 0
                 ? "bg-gray-400"
-                : "bg-blue-600 hover:bg-blue-700"
+                : "bg-[#FF6B35] hover:bg-[#C75000]"
             }`}
           >
             {processing
@@ -382,7 +382,7 @@ export default function PaymentPage({
 
       {paymentMethod === "wooricard" && (
         <div>
-          <div className="bg-blue-50 p-4 rounded mb-4 text-center">
+          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
             <p className="text-sm">우리카드 간편결제를 선택하셨습니다.</p>
             <p className="text-sm">
               아래 버튼을 클릭하시면 우리카드 결제 페이지로 이동합니다.
@@ -401,7 +401,7 @@ export default function PaymentPage({
             className={`w-full py-3 rounded-md font-medium text-white ${
               processing || timeLeft <= 0
                 ? "bg-gray-400"
-                : "bg-blue-600 hover:bg-blue-700"
+                : "bg-[#FF6B35] hover:bg-[#C75000]"
             }`}
           >
             {processing ? "처리 중..." : "우리카드로 결제하기"}
