@@ -1,26 +1,211 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  --color-primary: #ff6b35;
+  --color-primary-dark: #c75000;
+  --color-primary-light: #fff0eb;
+  --color-secondary: #ffd166;
+  --color-navy: #004e89;
+  --color-mint: #70e4b0;
+
+  /* Neutral Colors */
+  --color-text-black: #1a1a1a;
+  --color-text-dark-gray: #4a4a4a;
+  --color-text-mid-gray: #767676;
+  --color-text-light-gray: #e0e0e0;
+  --color-bg-gray: #f8f8f8;
+  --color-white: #ffffff;
+
+  /* Status Colors */
+  --color-success: #70e4b0;
+  --color-error: #ff3b30;
+  --color-warning: #ffcc00;
+  --color-info: #007aff;
+
+  /* Background/Foreground */
+  --background: var(--color-white);
+  --foreground: var(--color-text-black);
+
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 249, 250, 251;
+  --background-end-rgb: 255, 255, 255;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Brand Colors (Dark) */
+    --color-primary-dark: #a13d00;
+
+    /* UI Colors (Dark) */
+    --color-ui-disable: #4b5563;
+
+    /* Background/Foreground (Dark) */
+    --background: var(--color-black);
+    --foreground: var(--color-blue-white);
   }
 }
 
+/* Font settings */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+    Roboto, sans-serif;
+  color: var(--color-text-black);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Pretendard 폰트 설정 */
+.font-pretendard {
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+/* 폰트 가중치 */
+.font-regular {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#FF6B35] text-white py-2 px-4 rounded-md hover:bg-[#C75000] transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+  }
+
+  .input {
+    @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF6B35];
+  }
+}
+
+/* Custom button styles using design system */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-ui-strong);
+}
+
+.btn-primary:disabled {
+  background-color: var(--color-ui-disable);
+  cursor: not-allowed;
+}
+
+/* Category button styles */
+.category-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  background-color: var(--color-bg-gray);
+  color: var(--color-text-dark-gray);
+  transition: all 0.2s ease-in-out;
+}
+
+.category-btn.active {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 500;
+}
+
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Card styles */
+.menu-card {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Optimize touch targets */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Prevent text resizing */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Remove iOS tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Add iOS-style momentum scrolling */
+.ios-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make the app feel more native */
+@layer utilities {
+  .no-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Fix 100vh issues in mobile browsers */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: stretch;
 }

@@ -1,103 +1,140 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+// QR 코드에서 테이블 정보 추출 함수 (실제로는 lib/qrcode.ts에 구현)
+const extractTableInfo = (url: string) => {
+  // 여기서는 간단한 구현만 제공
+  // URL에서 storeId와 tableId 추출 (예: /store/123/table/456)
+  const storeMatch = url.match(/\/store\/(\d+)/);
+  const tableMatch = url.match(/\/table\/(\d+)/);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return {
+    storeId: storeMatch ? storeMatch[1] : null,
+    tableId: tableMatch ? tableMatch[1] : null,
+  };
+};
+
+export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // TODO: URL 파라미터에서 QR 정보 추출 로직
+    // 실제 구현에서는 URL 파라미터나 해시 등에서 정보 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get("storeId");
+    const tableId = urlParams.get("tableId");
+
+    // QR 코드를 통해 접속하면 자동으로 메뉴 페이지로 리디렉션
+    if (storeId && tableId) {
+      router.push(`/menu/${storeId}?tableId=${tableId}`);
+    }
+  }, [router]);
+
+  return (
+    <main className="flex flex-col min-h-screen bg-gradient-to-b from-blue-white to-white">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative overflow-hidden">
+          {/* 배경 패턴 */}
+          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-40 h-40 bg-primary-light rounded-full opacity-20"></div>
+          <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-32 h-32 bg-primary-light rounded-full opacity-15"></div>
+
+          <div className="relative text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-2xl font-bold">Q</span>
+              </div>
+            </div>
+
+            <h1 className="text-3xl font-bold text-primary mb-2">원큐오더</h1>
+            <p className="text-gray-600 mb-10">
+              테이블 QR 코드를 스캔하면
+              <br />
+              주문 페이지로 연결됩니다
+            </p>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-primary"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span className="ml-3 text-left text-sm">
+                  카메라로 QR 코드 스캔
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-primary"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span className="ml-3 text-left text-sm">
+                  메뉴 확인 및 선택
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-primary"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z"
+                      clipRule="evenodd"
+                    />
+                    <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" />
+                  </svg>
+                </div>
+                <span className="ml-3 text-left text-sm">
+                  결제 완료 후 음식 제공
+                </span>
+              </div>
+            </div>
+
+            {/* 개발용 바로가기 버튼 (실제 배포 시 제거) */}
+            <div className="space-y-3">
+              <a
+                href="/menu/1?tableId=1"
+                className="block w-full py-3 px-4 bg-primary text-white rounded-lg font-medium shadow-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+              >
+                (개발용) 메뉴 페이지로 이동
+              </a>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <p className="mt-8 text-xs text-gray-500">
+          앱 설치 없이 바로 이용 가능합니다
+        </p>
+      </div>
+    </main>
   );
 }
