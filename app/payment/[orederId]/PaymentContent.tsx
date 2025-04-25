@@ -11,7 +11,7 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
   const restaurantId = searchParams.get("restaurantId");
   const tableId = searchParams.get("tableId");
 
-  const { items, totalAmount } = useCart();
+  const { items, totalAmount, clearCart } = useCart();
 
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wooricard" | "tosspay" | "kakaopay">("wooricard");
@@ -55,32 +55,61 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
     setFormData((prev) => ({ ...prev, [name]: formatted }));
   };
 
+  const generateOrderId = (tableId: string | null) => {
+    const now = new Date();
+    const yy = now.getFullYear().toString().slice(2); // 연도 2자리
+    const MM = (now.getMonth() + 1).toString().padStart(2, "0"); // 월
+    const dd = now.getDate().toString().padStart(2, "0"); // 일
+    const HH = now.getHours().toString().padStart(2, "0"); // 시
+    const mm = now.getMinutes().toString().padStart(2, "0"); // 분
+  
+    return `${yy}${MM}${dd}T${HH}${mm}_t${tableId}`;
+  };
+  
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
     setPaymentError(null);
-    // 백엔드 api 호출할때 넘겨줄 데이터들
-    // //const orderPayload = {
-    //     orderId: orderId,                      // 주문 ID
-    //     paymentMethod: paymentMethod,          // 결제 수단 (CARD, 우리카드 등)
-    //     totalAmount: totalAmount,              // 총 금액
-    //     items: items.map(item => ({             // 장바구니 → OrderMenu + OrderMenuOption
-    //       menuId: item.id,
-    //       quantity: item.quantity,
-    //       options: item.options || {}          // 옵션 정보
-    //     }))
-    //   };
+  
     try {
-      // TODO: 실제 결제 로직  
-      
-      setTimeout(() => {
-        router.push(`/order/${orderId}/status`);
-      }, 1500);
+      const generatedOrderId = generateOrderId(tableId); // 주문 ID 생성
+  
+      const orderPayload = {
+        order_id: generatedOrderId,
+        totalAmount: totalAmount,
+        items: items.map((item) => ({
+          menuId: item.id,
+          quantity: item.quantity,
+          options: item.options || {},
+        })),
+      };
+  
+      // 💡 실제 API 호출 (지금은 mock)
+      // await fetch("/api/order", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(orderPayload),
+      // });
+  
+      // ✅ 기존 cart 삭제
+      clearCart();
+  
+      // ✅ 새로 생성한 order_id로 cart 저장
+      localStorage.setItem(
+        `${generatedOrderId}`,
+        JSON.stringify(items)
+      );
+  
+      // 🔄 메뉴 페이지 이동
+      router.push(`/restaurant/${restaurantId}/table/${tableId}/menu`);
     } catch (error) {
+      console.error(error);
       setPaymentError("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
       setProcessing(false);
     }
   };
+  
+  
 
   if (items.length === 0) {
     return (
@@ -105,7 +134,7 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
         >
           &larr; 장바구니로 돌아가기
         </Link>
-        <h1 className="text-2xl font-bold mt-2">결제하기</h1>
+        <h1 className="text-2xl font-bold mt-2">주문하기</h1>
         <div className="mt-2 text-sm bg-[#FFF8E8] p-2 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FFD166] mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />

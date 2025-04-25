@@ -153,7 +153,7 @@ export default function MenuPage({
       setIsLoading(false);
     }, 300);
 
-    setStoreName(`원큐오더 레스토랑 ${params.restaurantId}`);
+    setStoreName(`원큐오더 레스토랑 `);
 
     const cartData = localStorage.getItem(`cart_${params.tableId}`);
     if (cartData) {
@@ -209,7 +209,22 @@ export default function MenuPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
-      <NavBar storeName={storeName} tableId={params.tableId} />
+      
+    <div className="fixed top-24 right-4 z-20">
+      <Link
+        href={`/restaurant/${params.restaurantId}/table/${params.tableId}/orders`}
+        className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 shadow-sm hover:shadow-md transition"
+      >
+        <img src="/order-history.svg" alt="주문내역" className="w-4 h-4 mr-2" />
+        <span className="text-sm text-[var(--color-text-black)] font-medium">
+          주문내역 보기
+        </span>
+      </Link>
+    </div>
+
+      <NavBar tableId={params.tableId}>
+         {storeName}
+      </NavBar>
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div

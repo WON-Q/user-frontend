@@ -52,6 +52,7 @@ export default function MenuCard({ menu, onClick }: MenuCardProps) {
               e.stopPropagation();
               onClick(menu);
             }}
+          
             className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors active:scale-95 no-highlight"
             aria-label="메뉴 보기"
           >

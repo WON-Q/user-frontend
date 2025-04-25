@@ -63,7 +63,11 @@ export default function CartPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white">
-      <NavBar storeName="장바구니" tableId={tableId} />
+     
+     <NavBar restaurantId={restaurantId} tableId={tableId} type="back">
+      장바구니
+    </NavBar>
+
 
       <div className="flex-1 px-4 py-6">
         {items.length === 0 ? (

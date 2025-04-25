@@ -10,7 +10,8 @@ export default function CartButtons({
   tableId,
 }: CartButtonsProps) {
   return (
-    <div className="sticky bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200 p-4 flex gap-3 safe-area-bottom z-[100] max-w-screen-md mx-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 p-4 flex gap-3 safe-area-bottom z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+
       <Link
         href={`/restaurant/${restaurantId}/table/${tableId}/menu`}
         className="flex-1 h-12 border border-[var(--color-primary)] text-[var(--color-primary)] rounded-xl flex items-center justify-center font-medium transition-colors hover:bg-[var(--color-primary-light)]"
