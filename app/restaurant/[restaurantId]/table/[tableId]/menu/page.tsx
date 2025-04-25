@@ -6,7 +6,9 @@ import Link from "next/link";
 import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
-import OrderList from "@/components/menu/OrderList";
+
+import OrderListModal from "@/components/menu/OrderListModal";
+
 import { MenuItem, MenuCategory, SelectedOptions } from "@/types/menu";
 
 // 더미 데이터 - 실제론 API 호출로 대체
@@ -207,6 +209,8 @@ export default function MenuPage({
     setSelectedMenu(menu);
     setIsModalOpen(true);
   };
+  
+
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
@@ -216,7 +220,7 @@ export default function MenuPage({
          {storeName}
       </NavBar>
 
-      <OrderList tableId={params.tableId} />
+    
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div
