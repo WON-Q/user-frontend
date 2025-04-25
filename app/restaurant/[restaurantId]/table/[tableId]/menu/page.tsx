@@ -6,6 +6,7 @@ import Link from "next/link";
 import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
+import OrderList from "@/components/menu/OrderList";
 import { MenuItem, MenuCategory, SelectedOptions } from "@/types/menu";
 
 // 더미 데이터 - 실제론 API 호출로 대체
@@ -210,21 +211,12 @@ export default function MenuPage({
   return (
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
       
-    <div className="fixed top-24 right-4 z-20">
-      <Link
-        href={`/restaurant/${params.restaurantId}/table/${params.tableId}/orders`}
-        className="flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 shadow-sm hover:shadow-md transition"
-      >
-        <img src="/order-history.svg" alt="주문내역" className="w-4 h-4 mr-2" />
-        <span className="text-sm text-[var(--color-text-black)] font-medium">
-          주문내역 보기
-        </span>
-      </Link>
-    </div>
-
+      
       <NavBar tableId={params.tableId}>
          {storeName}
       </NavBar>
+
+      <OrderList tableId={params.tableId} />
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div
