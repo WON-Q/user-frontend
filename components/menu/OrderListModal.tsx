@@ -9,6 +9,7 @@ interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  options?: Record<string, any>;
 }
 
 interface OrderListModalProps {
@@ -19,7 +20,7 @@ interface OrderListModalProps {
 
 export default function OrderListModal({ isOpen, onClose, tableId }: OrderListModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [orders, setOrders] = useState<Record<string, OrderItem[]>>({});
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,35 +51,41 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
         key.endsWith(`_t${tableId}`)
       );
 
-      let combinedOrders: OrderItem[] = [];
+      const groupedOrders: Record<string, OrderItem[]> = {};
+
       matchedKeys.forEach((key) => {
         const storedOrders = localStorage.getItem(key);
         if (storedOrders) {
           try {
             const parsedOrders: OrderItem[] = JSON.parse(storedOrders);
-            combinedOrders = [...combinedOrders, ...parsedOrders];
+
+            // 키에서 날짜와 시간(YYYY-MM-DD HH:mm) 추출
+            const dateTimeMatch = key.match(/(\d{6})T(\d{4})_t/);
+            const dateLabel = dateTimeMatch
+              ? `20${dateTimeMatch[1].slice(0, 2)}-${dateTimeMatch[1].slice(2, 4)}-${dateTimeMatch[1].slice(4, 6)}`
+              : "날짜 없음";
+            const timeLabel = dateTimeMatch
+              ? `${dateTimeMatch[2].slice(0, 2)}:${dateTimeMatch[2].slice(2, 4)}`
+              : "시간 없음";
+            const dateTimeLabel = `${dateLabel} ${timeLabel}`;
+
+            if (!groupedOrders[dateTimeLabel]) {
+              groupedOrders[dateTimeLabel] = [];
+            }
+            groupedOrders[dateTimeLabel].push(...parsedOrders);
+
           } catch (e) {
             console.error("로컬스토리지 파싱 오류:", e);
           }
         }
       });
 
-      // 이름별로 합산
-      const aggregatedOrders = combinedOrders.reduce((acc: Record<string, OrderItem>, curr) => {
-        if (acc[curr.name]) {
-          acc[curr.name].quantity += curr.quantity;
-        } else {
-          acc[curr.name] = { ...curr };
-        }
-        return acc;
-      }, {});
-
-      setOrders(Object.values(aggregatedOrders));
+      setOrders(groupedOrders);
     }
   }, [isOpen, tableId]);
 
-  const totalItems = orders.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = orders.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItems = Object.values(orders).flat().reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = Object.values(orders).flat().reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (!isOpen || !mounted) return null;
   return createPortal(
@@ -97,21 +104,33 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
         </div>
   
         <div className="flex-1 overflow-y-auto p-5">
-          {orders.length === 0 ? (
+          {Object.keys(orders).length === 0 ? (
             <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
           ) : (
-            <ul className="space-y-4">
-              {orders.map((order, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  <span>{order.name} x {order.quantity}</span>
-                  <span>{(order.price * order.quantity).toLocaleString()}원</span>
-                </li>
-              ))}
-            </ul>
+            Object.entries(orders).map(([dateTime, orderList]) => (
+              <div key={dateTime} className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">{dateTime} 주문</h3>
+                <ul className="space-y-2">
+                  {orderList.map((order, idx) => (
+                    <li key={idx} className="flex justify-between text-sm">
+                      <span>
+                        {order.name} x {order.quantity}
+                        {order.options && Object.keys(order.options).length > 0 && (
+                          <span className="text-gray-500 text-xs ml-1">
+                            ({Object.entries(order.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
+                          </span>
+                        )}
+                      </span>
+                      <span>{(order.price * order.quantity).toLocaleString()}원</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
         </div>
   
-        {orders.length > 0 && (
+        {Object.keys(orders).length > 0 && (
           <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex justify-between mb-2">
               <span className="font-semibold text-gray-900">총 메뉴 수</span>

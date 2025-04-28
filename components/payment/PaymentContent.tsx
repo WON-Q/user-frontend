@@ -319,24 +319,19 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
           </button>
         </form>
       )}
-
-      {["wooricard", "tosspay", "kakaopay"].includes(paymentMethod) && (
+        {/*카드 마케팅*/}
+      {["wooricard", "tosspay", "kakaopay"].includes(paymentMethod) && (  
         <div>
-          <div className="bg-[#FFF0E8] p-4 rounded mb-4 text-center">
-            <p className="text-sm">
-              {paymentMethod === "wooricard"
-                ? "우리카드 간편결제를 선택하셨습니다."
-                : paymentMethod === "tosspay"
-                ? "토스페이를 선택하셨습니다."
-                : "카카오페이를 선택하셨습니다."}
-            </p>
-            <p className="text-sm">
-              아래 버튼을 클릭하시면 {paymentMethod === "wooricard"
-                ? "우리카드"
-                : paymentMethod === "tosspay"
-                ? "토스페이"
-                : "카카오페이"} 결제 페이지로 이동합니다.
-            </p>
+          <div className="bg-[#FFF8E8] p-4 rounded mb-4 text-center flex items-center">
+            <img
+              src="/우리카드.png"
+              alt="우리카드"
+              className="w-11 h-16 ml-5 mr-10"
+            />
+            <div className="text-left mt-1 text-[#FF6B35]">
+              <p className="text-lg font-bold">우리카드의정석 EVERY DISCOUNT</p>
+              <p className="text-sm">온라인 간편결제 2% 할인</p>
+            </div>
           </div>
           {paymentError && (
             <div className="p-3 bg-red-50 text-red-700 rounded text-sm mb-4">

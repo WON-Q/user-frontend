@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { CartProvider } from "@/context/CartContext";
-import PaymentContent from "./PaymentContent";
+import PaymentContent from "../../../components/payment/PaymentContent";
 
 export default function PaymentPage({ params }: { params: { orderId: string } }) {
   const searchParams = useSearchParams();

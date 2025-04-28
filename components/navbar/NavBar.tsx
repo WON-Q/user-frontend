@@ -7,11 +7,18 @@ interface NavBarProps {
   restaurantId?: string;
   children: ReactNode;
   type?: "back" | "logo";
+  showOrderListModal?: boolean; // New prop to control modal visibility
 }
 
-export default function NavBar({ tableId, restaurantId, children, type = "logo" }: NavBarProps) {
+export default function NavBar({
+  tableId,
+  restaurantId,
+  children,
+  type = "logo",
+  showOrderListModal = false,
+}: NavBarProps) {
   const router = useRouter();
-  const [isOrderModalOpen, setOrderModalOpen] = useState(false); // 주문내역 모달 상태
+  const [isOrderModalOpen, setOrderModalOpen] = useState(false);
 
   const handleBack = () => {
     if (restaurantId && tableId) {
@@ -22,51 +29,56 @@ export default function NavBar({ tableId, restaurantId, children, type = "logo" 
   };
 
   return (
-    <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm py-4 px-4 relative">
-      <div className="flex items-center justify-between relative">
+    <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm py-3 px-4 relative">
+      <div className="flex items-center justify-between">
         {/* 왼쪽: 로고 or 뒤로가기 */}
-        <div className="flex-1 flex justify-start">
-          <div className="flex items-center justify-center h-10 px-3 py-1 rounded-lg">
-            {type === "back" ? (
-              <button onClick={handleBack}>
-                <img src="/back.svg" alt="Back" className="w-6 h-6" />
-              </button>
-            ) : (
-              <img src="/images/store-logo.png" alt="Store Logo" className="w-8 h-8 rounded-full" />
-            )}
-          </div>
+        <div className="flex items-center">
+          {type === "back" ? (
+            <button onClick={handleBack} aria-label="뒤로가기">
+              <img src="/back.svg" alt="Back" className="w-6 h-6" />
+            </button>
+          ) : (
+            <img
+              src="/images/store-logo.png"
+              alt="Store Logo"
+              className="w-8 h-8 rounded-full"
+            />
+          )}
+          {children === "장바구니" ? (
+            <h1 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 font-bold text-[20px] text-[#1A1A1A]">
+              {children}
+            </h1>
+          ) : (
+            <h1 className="ml-2 font-bold text-[20px] text-[#1A1A1A]">{children}</h1>
+          )}
         </div>
 
-        {/* 가운데: children (가게 이름 또는 장바구니) */}
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <h1 className="font-bold text-h2-mobile">{children}</h1>
-        </div>
-
-        {/* 오른쪽: 테이블 번호 + 주문내역 버튼 */}
-        <div className="flex-1 flex justify-end items-center space-x-2">
-          {/* 주문내역 버튼 */}
-          {tableId && (
+        {/* 오른쪽: 주문내역 버튼 + 테이블 번호 */}
+        <div className="flex items-center space-x-2">
+          {tableId && showOrderListModal && (
             <button
               onClick={() => setOrderModalOpen(true)}
-              className="flex flex-col items-center justify-center text-xs bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm hover:bg-gray-50"
+              className="flex flex-col items-center justify-center min-w-[60px] min-h-[56px] bg-[#FFE4E1] border border-gray-200 rounded-lg shadow-sm hover:bg-[#FFDAB9]"
             >
-              <span className="text-[10px] text-gray-500">주문내역</span>
-              <span className="font-semibold text-gray-700">보기</span>
+              <span className="text-[14px] font-bold text-[#1A1A1A] leading-none">주문내역</span>
+              <span className="text-[14px] font-semibold text-[#1A1A1A] leading-none">
+                보기
+              </span>
             </button>
           )}
-
-          {/* 테이블 번호 */}
-          <div className="text-center bg-[#F0F4FF] px-3 py-1 rounded-lg">
-            <p className="text-caption text-primary">테이블</p>
-            <p className="text-h3 text-primary font-bold">
-              {tableId + "번" || "N/A"}
-            </p>
-          </div>
+          {tableId && (
+            <div className="flex flex-col items-center justify-center min-w-[60px] min-h-[56px] bg-[#FFE4E1] rounded-lg">
+              <span className="text-[14px] font-bold text-[#1A1A1A] leading-none">테이블</span>
+              <span className="text-[14px] font-bold text-[#1A1A1A] leading-none">
+                {tableId}번
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 주문내역 모달 */}
-      {tableId && (
+      {tableId && showOrderListModal && (
         <OrderListModal
           isOpen={isOrderModalOpen}
           onClose={() => setOrderModalOpen(false)}

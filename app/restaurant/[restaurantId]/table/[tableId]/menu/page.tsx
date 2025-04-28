@@ -7,7 +7,6 @@ import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
 
-import OrderListModal from "@/components/menu/OrderListModal";
 
 import { MenuItem, MenuCategory, SelectedOptions } from "@/types/menu";
 
@@ -25,7 +24,7 @@ const MOCK_MENU_ITEMS = [
     id: 1,
     name: "시그니처 버거",
     price: 8900,
-    image: "/images/burger.jpg",
+    image: "/images/burger.jpeg",
     description: "원큐오더 시그니처 버거",
     categoryId: "main",
     badge: "인기",
@@ -216,7 +215,7 @@ export default function MenuPage({
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
       
       
-      <NavBar tableId={params.tableId}>
+      <NavBar tableId={params.tableId} showOrderListModal={true}>
          {storeName}
       </NavBar>
 
