@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -88,11 +87,12 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
   const totalAmount = Object.values(orders).flat().reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (!isOpen || !mounted) return null;
+
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div
         ref={modalRef}
-        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-slide-up"
+        className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in"
       >
         <div className="flex justify-between items-center p-5 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">주문 내역</h2>
@@ -102,7 +102,7 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
             </svg>
           </button>
         </div>
-  
+
         <div className="flex-1 overflow-y-auto p-5">
           {Object.keys(orders).length === 0 ? (
             <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
@@ -129,7 +129,7 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
             ))
           )}
         </div>
-  
+
         {Object.keys(orders).length > 0 && (
           <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex justify-between mb-2">
@@ -146,5 +146,4 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
     </div>,
     document.body
   );
-  
 }

@@ -104,16 +104,18 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
     });
   };
 
-  const updateQuantity = (itemId: number, newQuantity: number) => {
+  const updateQuantity = (index: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-    
-    setItems(currentItems => 
-      currentItems.map(item => 
-        item.id === itemId 
-          ? { ...item, quantity: newQuantity, totalPrice: item.price * newQuantity }
-          : item
-      )
-    );
+  
+    setItems((currentItems) => {
+      const updatedItems = [...currentItems];
+      const item = updatedItems[index];
+      if (!item) return currentItems;
+  
+      item.quantity = newQuantity;
+      item.totalPrice = item.price * newQuantity;
+      return updatedItems;
+    });
   };
 
   const clearCart = () => {

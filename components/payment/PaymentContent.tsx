@@ -147,16 +147,18 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
       <div className="bg-gray-50 p-4 rounded mb-6">
         <h2 className="font-semibold mb-2">주문 내역</h2>
         {items.map((item, index) => (
-          <div key={index} className="flex justify-between py-1 text-sm">
-            <span>
+          <div key={index} className="grid grid-cols-[1fr_auto] gap-2 py-1 text-sm">
+            <div>
               {item.name} x {item.quantity}
               {item.options && Object.keys(item.options).length > 0 && (
                 <span className="text-gray-500 text-xs ml-1">
                   ({Object.entries(item.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
                 </span>
               )}
-            </span>
-            <span>{item.totalPrice.toLocaleString()}원</span>
+            </div>
+            <div className="text-right whitespace-nowrap">
+              {item.totalPrice.toLocaleString()}원
+            </div>
           </div>
         ))}
         <div className="border-t border-gray-200 my-2" />
