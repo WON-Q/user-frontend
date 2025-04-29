@@ -28,10 +28,7 @@ export default function MenuDetailModal({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
     }
@@ -87,20 +84,17 @@ export default function MenuDetailModal({
 
   const handleAddToCart = () => {
     if (menu) {
-      // 선택된 옵션을 문자열로 변환
       const optionsForCart: { [key: string]: string } = {};
       Object.entries(selectedOptions).forEach(([title, option]) => {
         optionsForCart[title] = option.name;
       });
 
-      // CartContext의 addItem 함수 호출
       addItem(menu, quantity, optionsForCart);
 
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
       }
 
-      // 성공 메시지 표시
       const successEl = document.getElementById("cartSuccess");
       if (successEl) {
         successEl.classList.remove("opacity-0", "translate-y-2");
@@ -124,7 +118,8 @@ export default function MenuDetailModal({
         ref={modalRef}
         className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-slide-up"
       >
-        <div className="relative h-56 w-full">
+        {/* 상단 이미지 */}
+        <div className="relative w-full h-[220px] sm:h-[300px]">
           <Image
             src={menu.image}
             alt={menu.name}
@@ -151,29 +146,15 @@ export default function MenuDetailModal({
               />
             </svg>
           </button>
+
           {menu.badge && (
             <div className="absolute top-4 left-4 bg-primary text-white text-base font-semibold px-4 py-1.5 rounded-full flex items-center gap-2">
-              {menu.badge === "인기" && (
-                <Image
-                  src="/images/fire.png"
-                  alt="fire"
-                  width={16} // 크기 업!
-                  height={16}
-                />
-              )}
               {menu.badge}
-              {menu.badge === "인기" && (
-                <Image
-                  src="/images/fire.png"
-                  alt="fire"
-                  width={16} // 크기 업!
-                  height={16}
-                />
-              )}
             </div>
           )}
         </div>
 
+        {/* 상세 내용 */}
         <div className="flex-1 overflow-y-auto p-5">
           <h3 className="font-bold text-2xl text-gray-900">{menu.name}</h3>
           <p className="text-gray-600 mt-1 mb-4">{menu.description}</p>
@@ -181,53 +162,53 @@ export default function MenuDetailModal({
           <div className="border-t border-gray-200 my-4"></div>
 
           {menu.options?.map((optGroup, index) => (
-              <div key={index} className="mb-5">
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  {optGroup.title}
-                  {optGroup.required && (
-                    <span className="text-error ml-1">*</span>
-                  )}
-                </h4>
-                <div className="space-y-2">
-                  {optGroup.items.map((option, idx) => (
-                   <div
-                   key={idx}
-                   className={`flex items-center p-3 rounded-lg cursor-pointer ${
-                     selectedOptions[optGroup.title]?.name === option.name
-                       ? "bg-gray-200" // ✅ Only background color when selected
-                       : ""
-                   }`}
-                   onClick={() => handleOptionChange(optGroup.title, option)}
-                 >
-                   <input
-                     type="radio"
-                     id={`${menu.id}-${optGroup.title}-${idx}`}
-                     name={`${menu.id}-${optGroup.title}`}
-                     checked={selectedOptions[optGroup.title]?.name === option.name}
-                     onChange={() => handleOptionChange(optGroup.title, option)}
-                     className="appearance-none h-5 w-5 mr-3 rounded-full border-2 border-gray-300 checked:border-orange-500 relative
-                                 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-2.5 after:h-2.5 after:rounded-full after:bg-orange-500 after:opacity-0 checked:after:opacity-100"
-                 />
-                   <label
-                     htmlFor={`${menu.id}-${optGroup.title}-${idx}`}
-                     className="flex-1 text-gray-800 text-sm cursor-pointer"
-                   >
-                     {option.name}
-                   </label>
-                   {option.price > 0 && (
-                     <span className="text-primary text-sm">
-                       +{option.price.toLocaleString()}원
-                     </span>
-                   )}
-                 </div>
-                 
-                  ))}
-                </div>
+            <div key={index} className="mb-5">
+              <h4 className="font-semibold text-gray-900 mb-2">
+                {optGroup.title}
+                {optGroup.required && (
+                  <span className="text-error ml-1">*</span>
+                )}
+              </h4>
+              <div className="space-y-2">
+                {optGroup.items.map((option, idx) => (
+                      <div
+                      key={idx}
+                      className={`flex items-center p-1 rounded-md cursor-pointer ${
+                        selectedOptions[optGroup.title]?.name === option.name
+                          ? "bg-gray-100"
+                          : ""
+                      }`}
+                      onClick={() => handleOptionChange(optGroup.title, option)}
+                    >
+                    <input
+                      type="radio"
+                      id={`${menu.id}-${optGroup.title}-${idx}`}
+                      name={`${menu.id}-${optGroup.title}`}
+                      checked={selectedOptions[optGroup.title]?.name === option.name}
+                      onChange={() => handleOptionChange(optGroup.title, option)}
+                      className="appearance-none h-5 w-5 mr-3 rounded-full border-2 border-gray-300 checked:border-orange-500 relative
+                        after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-2.5 after:h-2.5 after:rounded-full after:bg-orange-500 after:opacity-0 checked:after:opacity-100"
+                    />
+                    <label
+                      htmlFor={`${menu.id}-${optGroup.title}-${idx}`}
+                      className="flex-1 text-gray-800 text-sm cursor-pointer"
+                    >
+                      {option.name}
+                    </label>
+                    {option.price > 0 && (
+                      <span className="text-primary text-sm">
+                        +{option.price.toLocaleString()}원
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          ))}
 
           <div className="border-t border-gray-200 my-4"></div>
 
+          {/* 수량 선택 */}
           <div className="flex items-center justify-between mb-4">
             <span className="font-semibold text-gray-900">수량</span>
             <div className="flex items-center bg-gray-50 rounded-lg overflow-hidden">
@@ -277,6 +258,7 @@ export default function MenuDetailModal({
           </div>
         </div>
 
+        {/* 하단 주문 금액 + 버튼 */}
         <div className="p-4 border-t border-gray-200 bg-white">
           <div className="flex justify-between items-center mb-3">
             <span className="font-semibold text-lg text-gray-900">
