@@ -59,28 +59,34 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
 
   const addItem = (menuItem: MenuItem, quantity: number, options?: { [key: string]: string }) => {
     setItems(currentItems => {
-      // 옵션을 문자열로 변환하여 비교에 사용
       const optionsKey = options ? JSON.stringify(options) : '';
-      
-      // 동일한 메뉴와 옵션을 가진 아이템 찾기
+
       const existingItemIndex = currentItems.findIndex(item => 
         item.id === menuItem.id && JSON.stringify(item.options) === optionsKey
       );
 
+      // ✅ 옵션 가격 계산
+      const optionTotalPrice = menuItem.options
+        ?.reduce((sum, optGroup) => {
+          const selectedOptionName = options?.[optGroup.title];
+          const selectedOption = optGroup.items.find(item => item.name === selectedOptionName);
+          return sum + (selectedOption?.price || 0);
+        }, 0) || 0;
+
+      const finalUnitPrice = menuItem.price + optionTotalPrice; // 옵션 포함 단가
+      const totalPrice = finalUnitPrice * quantity;
+
       if (existingItemIndex >= 0) {
-        // 이미 존재하는 아이템이면 수량만 증가
         const updatedItems = [...currentItems];
         const item = updatedItems[existingItemIndex];
         item.quantity += quantity;
-        item.totalPrice = item.price * item.quantity;
+        item.totalPrice = finalUnitPrice * item.quantity; // ✅ 옵션 포함된 가격으로 다시 계산
         return updatedItems;
       } else {
-        // 새로운 아이템 추가
-        const totalPrice = menuItem.price * quantity;
         return [...currentItems, {
           id: menuItem.id,
           name: menuItem.name,
-          price: menuItem.price,
+          price: finalUnitPrice, // ✅ 옵션 포함된 가격 저장
           quantity,
           options,
           image: menuItem.image,

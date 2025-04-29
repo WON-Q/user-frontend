@@ -152,8 +152,24 @@ export default function MenuDetailModal({
             </svg>
           </button>
           {menu.badge && (
-            <div className="absolute top-4 left-4 bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
+            <div className="absolute top-4 left-4 bg-primary text-white text-base font-semibold px-4 py-1.5 rounded-full flex items-center gap-2">
+              {menu.badge === "인기" && (
+                <Image
+                  src="/images/fire.png"
+                  alt="fire"
+                  width={16} // 크기 업!
+                  height={16}
+                />
+              )}
               {menu.badge}
+              {menu.badge === "인기" && (
+                <Image
+                  src="/images/fire.png"
+                  alt="fire"
+                  width={16} // 크기 업!
+                  height={16}
+                />
+              )}
             </div>
           )}
         </div>
