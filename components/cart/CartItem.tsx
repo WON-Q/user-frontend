@@ -3,8 +3,8 @@ import type { CartItem } from "../../context/CartContext"; // Use type-only impo
 
 interface CartItemProps {
   item: CartItem;
-  onQuantityChange: (id: number, quantity: number) => void;
-  onRemove: (id: number) => void;
+  onQuantityChange: (quantity: number) => void; // Updated to remove itemId
+  onRemove: () => void; // Updated to remove itemId
 }
 
 export default function CartItem({
@@ -46,7 +46,7 @@ export default function CartItem({
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
         <div className="flex items-center space-x-3">
           <button
-            onClick={() => onRemove(item.id)}
+            onClick={onRemove} // Simplified to directly call the passed function
             className="text-[var(--color-text-mid-gray)] hover:text-[var(--color-error)] transition-colors p-2 rounded-full hover:bg-red-50"
             aria-label="삭제"
           >
@@ -65,10 +65,7 @@ export default function CartItem({
           </button>
           <div className="flex items-center bg-white rounded-lg border border-gray-200 overflow-hidden">
             <button
-              onClick={() =>
-                item.quantity > 1 &&
-                onQuantityChange(item.id, item.quantity - 1)
-              }
+              onClick={() => onQuantityChange(item.quantity - 1)} // Updated to use quantity directly
               className={`w-10 h-10 flex items-center justify-center transition-colors ${
                 item.quantity <= 1
                   ? "text-gray-300 cursor-not-allowed"
@@ -94,7 +91,7 @@ export default function CartItem({
               {item.quantity}
             </span>
             <button
-              onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+              onClick={() => onQuantityChange(item.quantity + 1)} // Updated to use quantity directly
               className="w-10 h-10 flex items-center justify-center text-[var(--color-text-dark-gray)] hover:bg-gray-100 transition-colors"
               aria-label="수량 증가"
             >

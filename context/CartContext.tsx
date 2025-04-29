@@ -16,7 +16,7 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addItem: (item: MenuItem, quantity: number, options?: { [key: string]: string }) => void;
-  removeItem: (itemId: number) => void;
+  removeItem: (index: number) => void;
   updateQuantity: (itemId: number, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
@@ -96,8 +96,12 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
     });
   };
 
-  const removeItem = (itemId: number) => {
-    setItems(currentItems => currentItems.filter(item => item.id !== itemId));
+  const removeItem = (index: number) => {
+    setItems(currentItems => {
+      const updatedItems = [...currentItems];
+      updatedItems.splice(index, 1); // Remove one item at the given index
+      return updatedItems;
+    });
   };
 
   const updateQuantity = (itemId: number, newQuantity: number) => {

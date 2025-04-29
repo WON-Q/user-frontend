@@ -96,12 +96,12 @@ export default function CartPage({
                 </button>
               </div>
               <div>
-                {items.map((item) => (
+                {items.map((item, index) => (
                   <CartItem
                     key={`${item.id}-${JSON.stringify(item.options)}`}
                     item={item}
-                    onQuantityChange={updateQuantity}
-                    onRemove={removeItem}
+                    onQuantityChange={(quantity) => updateQuantity(index, quantity)} // Pass index-based callback
+                    onRemove={() => removeItem(index)} // Pass index-based callback
                   />
                 ))}
               </div>
