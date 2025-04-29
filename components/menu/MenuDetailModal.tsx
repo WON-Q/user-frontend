@@ -165,44 +165,50 @@ export default function MenuDetailModal({
           <div className="border-t border-gray-200 my-4"></div>
 
           {menu.options?.map((optGroup, index) => (
-            <div key={index} className="mb-5">
-              <h4 className="font-semibold text-gray-900 mb-2">
-                {optGroup.title}
-                {optGroup.required && (
-                  <span className="text-error ml-1">*</span>
-                )}
-              </h4>
-              <div className="space-y-2">
-                {optGroup.items.map((option, idx) => (
-                  <div key={idx} className="flex items-center">
-                    <input
-                      type="radio"
-                      id={`${menu.id}-${optGroup.title}-${idx}`}
-                      name={`${menu.id}-${optGroup.title}`}
-                      checked={
-                        selectedOptions[optGroup.title]?.name === option.name
-                      }
-                      onChange={() =>
-                        handleOptionChange(optGroup.title, option)
-                      }
-                      className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
-                    />
-                    <label
-                      htmlFor={`${menu.id}-${optGroup.title}-${idx}`}
-                      className="ml-3 flex-1 text-gray-800 text-sm cursor-pointer"
-                    >
-                      {option.name}
-                    </label>
-                    {option.price > 0 && (
-                      <span className="text-primary text-sm">
-                        +{option.price.toLocaleString()}원
-                      </span>
-                    )}
-                  </div>
-                ))}
+              <div key={index} className="mb-5">
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  {optGroup.title}
+                  {optGroup.required && (
+                    <span className="text-error ml-1">*</span>
+                  )}
+                </h4>
+                <div className="space-y-2">
+                  {optGroup.items.map((option, idx) => (
+                   <div
+                   key={idx}
+                   className={`flex items-center p-3 rounded-lg cursor-pointer ${
+                     selectedOptions[optGroup.title]?.name === option.name
+                       ? "bg-gray-200" // ✅ Only background color when selected
+                       : ""
+                   }`}
+                   onClick={() => handleOptionChange(optGroup.title, option)}
+                 >
+                   <input
+                     type="radio"
+                     id={`${menu.id}-${optGroup.title}-${idx}`}
+                     name={`${menu.id}-${optGroup.title}`}
+                     checked={selectedOptions[optGroup.title]?.name === option.name}
+                     onChange={() => handleOptionChange(optGroup.title, option)}
+                     className="appearance-none h-5 w-5 mr-3 rounded-full border-2 border-gray-300 checked:border-orange-500 relative
+                                 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-2.5 after:h-2.5 after:rounded-full after:bg-orange-500 after:opacity-0 checked:after:opacity-100"
+                 />
+                   <label
+                     htmlFor={`${menu.id}-${optGroup.title}-${idx}`}
+                     className="flex-1 text-gray-800 text-sm cursor-pointer"
+                   >
+                     {option.name}
+                   </label>
+                   {option.price > 0 && (
+                     <span className="text-primary text-sm">
+                       +{option.price.toLocaleString()}원
+                     </span>
+                   )}
+                 </div>
+                 
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
           <div className="border-t border-gray-200 my-4"></div>
 
