@@ -19,7 +19,7 @@ export default function MenuCard({ menu, onClick }: MenuCardProps) {
     >
       <div className="relative h-36 w-full">
         <Image
-          src="/images/default.png"   // 나중에 이미지 수정정
+          src={menu.image}   
           alt={menu.name}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"

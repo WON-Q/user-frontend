@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";  // 추가: useParams 훅을 가져옵니다.
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import { MenuItem, MenuOption, SelectedOptions } from "@/types/menu";
 import { useCart } from "@/context/CartContext";
@@ -28,6 +28,8 @@ export default function MenuDetailModal({
   const { addItem } = useCart();
 
   useEffect(() => {
+    console.log("MenuDetailModal opened:", isOpen, "Menu:", menu);
+
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
@@ -43,10 +45,11 @@ export default function MenuDetailModal({
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, menu]);
 
   useEffect(() => {
     if (menu && isOpen) {
+      console.log("Initializing modal with menu:", menu);
       const initialOptions: SelectedOptions = {};
       let initialTotalPrice = menu.price;
 
@@ -76,7 +79,20 @@ export default function MenuDetailModal({
     }
   }, [selectedOptions, quantity, menu]);
 
+  useEffect(() => {
+    const cartData = localStorage.getItem(`cart_${tableId}`);
+    if (cartData) {
+      try {
+        const cart = JSON.parse(cartData);
+        console.log("Loaded cart data from localStorage:", cart);
+      } catch (e) {
+        console.error("Error parsing cart data from localStorage:", e);
+      }
+    }
+  }, [tableId]);
+
   const handleOptionChange = (optionTitle: string, option: MenuOption) => {
+    console.log("Option changed:", optionTitle, option);
     setSelectedOptions((prev) => ({
       ...prev,
       [optionTitle]: option,
@@ -90,6 +106,7 @@ export default function MenuDetailModal({
         optionsForCart[title] = option.name;
       });
 
+      console.log("Adding to cart:", { menu, quantity, optionsForCart });
       addItem(menu, quantity, optionsForCart);
 
       if (window.navigator && window.navigator.vibrate) {

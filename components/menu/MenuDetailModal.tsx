@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { MenuItem, MenuOption, SelectedOptions } from "@/types/menu";
 import { useCart } from "@/context/CartContext";
@@ -112,6 +112,9 @@ export default function MenuDetailModal({
 
   if (!isOpen || !menu) return null;
 
+  // 이미지 URL이 없을 경우, 기본 이미지로 대체
+  const imageUrl = menu.image || "/images/placeholder.png";
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center sm:items-center">
       <div
@@ -121,7 +124,7 @@ export default function MenuDetailModal({
         {/* 상단 이미지 */}
         <div className="relative w-full h-[220px] sm:h-[300px]">
           <Image
-            src="/images/placeholder.png" // Use placeholder if menu.image is not available
+            src={imageUrl}  // menu.image가 없으면 기본 이미지 사용
             alt={menu.name}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
@@ -171,15 +174,15 @@ export default function MenuDetailModal({
               </h4>
               <div className="space-y-2">
                 {optGroup.items.map((option, idx) => (
-                      <div
-                      key={idx}
-                      className={`flex items-center p-1 rounded-md cursor-pointer ${
-                        selectedOptions[optGroup.title]?.name === option.name
-                          ? "bg-gray-100"
-                          : ""
-                      }`}
-                      onClick={() => handleOptionChange(optGroup.title, option)}
-                    >
+                  <div
+                    key={idx}
+                    className={`flex items-center p-1 rounded-md cursor-pointer ${
+                      selectedOptions[optGroup.title]?.name === option.name
+                        ? "bg-gray-100"
+                        : ""
+                    }`}
+                    onClick={() => handleOptionChange(optGroup.title, option)}
+                  >
                     <input
                       type="radio"
                       id={`${menu.id}-${optGroup.title}-${idx}`}
@@ -214,9 +217,7 @@ export default function MenuDetailModal({
             <div className="flex items-center bg-gray-50 rounded-lg overflow-hidden">
               <button
                 onClick={() => quantity > 1 && setQuantity(quantity - 1)}
-                className={`px-3 py-1.5 ${
-                  quantity <= 1 ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`px-3 py-1.5 ${quantity <= 1 ? "text-gray-300" : "text-gray-600"}`}
                 aria-label="수량 감소"
                 disabled={quantity <= 1}
               >
@@ -261,9 +262,7 @@ export default function MenuDetailModal({
         {/* 하단 주문 금액 + 버튼 */}
         <div className="p-4 border-t border-gray-200 bg-white">
           <div className="flex justify-between items-center mb-3">
-            <span className="font-semibold text-lg text-gray-900">
-              총 주문금액
-            </span>
+            <span className="font-semibold text-lg text-gray-900">총 주문금액</span>
             <span className="font-bold text-xl text-primary">
               {totalPrice.toLocaleString()}원
             </span>
