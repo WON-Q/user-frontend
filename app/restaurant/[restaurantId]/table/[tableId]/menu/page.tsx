@@ -1,148 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { use } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
+import { fetchMenusByMerchant, MenuResponse } from "@/lib/merchant/menu";
+import { MenuItem, MenuCategory } from "@/types/menu";
 
+export default function MenuPage() {
+  const pathname = usePathname();
+  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [tableId, setTableId] = useState<string | null>(null);
 
-import { MenuItem, MenuCategory, SelectedOptions } from "@/types/menu";
-
-// 더미 데이터 - 실제론 API 호출로 대체
-const MOCK_CATEGORIES: MenuCategory[] = [
-  { id: "all", name: "전체" },
-  { id: "main", name: "메인메뉴" },
-  { id: "side", name: "사이드" },
-  { id: "drink", name: "음료" },
-  { id: "dessert", name: "디저트" },
-];
-
-const MOCK_MENU_ITEMS = [
-  {
-    id: 1,
-    name: "시그니처 버거",
-    price: 8900,
-    image: "/images/burger.jpeg",
-    description: "원큐오더 시그니처 버거",
-    categoryId: "main",
-    badge: "인기",
-    options: [
-      {
-        title: "소스 선택",
-        required: true,
-        items: [
-          { name: "기본 소스", price: 0 },
-          { name: "스파이시 소스", price: 500 },
-          { name: "갈릭 소스", price: 500 },
-        ],
-      },
-      {
-        title: "치즈 추가",
-        required: false,
-        items: [
-          { name: "치즈 없음", price: 0 },
-          { name: "치즈 추가", price: 1000 },
-          { name: "더블 치즈", price: 2000 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "치즈 버거",
-    price: 7900,
-    image: "/images/cheeseburger.jpg",
-    description: "풍미 가득한 치즈 버거",
-    categoryId: "main",
-    options: [
-      {
-        title: "소스 선택",
-        required: true,
-        items: [
-          { name: "기본 소스", price: 0 },
-          { name: "스파이시 소스", price: 500 },
-          { name: "갈릭 소스", price: 500 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "감자튀김",
-    price: 3500,
-    image: "/images/fries.jpg",
-    description: "바삭한 감자튀김",
-    categoryId: "side",
-    badge: "신메뉴",
-    options: [
-      {
-        title: "사이즈",
-        required: true,
-        items: [
-          { name: "미디움", price: 0 },
-          { name: "라지", price: 1500 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: "콜라",
-    price: 2000,
-    image: "/images/cola.jpg",
-    description: "시원한 콜라",
-    categoryId: "drink",
-    options: [
-      {
-        title: "사이즈",
-        required: true,
-        items: [
-          { name: "미디움", price: 0 },
-          { name: "라지", price: 800 },
-        ],
-      },
-      {
-        title: "얼음",
-        required: true,
-        items: [
-          { name: "보통", price: 0 },
-          { name: "적게", price: 0 },
-          { name: "없음", price: 0 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 5,
-    name: "아이스크림",
-    price: 2500,
-    image: "/images/icecream.jpg",
-    description: "달콤한 아이스크림",
-    categoryId: "dessert",
-    options: [
-      {
-        title: "토핑 선택",
-        required: false,
-        items: [
-          { name: "토핑 없음", price: 0 },
-          { name: "초콜릿 토핑", price: 800 },
-          { name: "딸기 토핑", price: 800 },
-        ],
-      },
-    ],
-  },
-];
-
-export default function MenuPage({
-  params: paramsPromise,
-}: {
-  params: Promise<{ restaurantId: string; tableId: string }>;
-}) {
-  const params = use(paramsPromise);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [menuItems] = useState<MenuItem[]>(MOCK_MENU_ITEMS);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [storeName, setStoreName] = useState("원큐오더 레스토랑");
   const [cartItemCount, setCartItemCount] = useState(0);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
@@ -151,13 +25,54 @@ export default function MenuPage({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    const parts = pathname.split("/");
+    setRestaurantId(parts[2] || null);
+    setTableId(parts[4] || null);
+  }, [pathname]);
 
-    setStoreName(`원큐오더 레스토랑 `);
+  useEffect(() => {
+    if (!restaurantId || !tableId) return;
 
-    const cartData = localStorage.getItem(`cart_${params.tableId}`);
+    const fetchData = async () => {
+      try {
+        const menus: MenuResponse[] = await fetchMenusByMerchant(restaurantId);
+
+        const uniqueCategories = Array.from(
+          new Set(menus.map((m) => m.category))
+        ).map((cat) => ({
+          id: cat.toLowerCase(),
+          name: cat,
+        }));
+        setCategories([{ id: "all", name: "전체" }, ...uniqueCategories]);
+
+        const parsedMenus: MenuItem[] = menus.map((menu) => ({
+          id: menu.menuId,
+          name: menu.name,
+          description: menu.description,
+          price: menu.price,
+          image: menu.menuImgUrl,
+          categoryId: menu.category.toLowerCase(),
+          options: menu.optionGroups.map((group) => ({
+            title: group.groupName,
+            required: group.isDefault,
+            items: group.options.map((opt) => ({
+              name: opt.optionName,
+              price: opt.optionPrice,
+            })),
+          })),
+        }));
+
+        setMenuItems(parsedMenus);
+      } catch (error) {
+        console.error("메뉴 불러오기 실패", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+
+    const cartData = localStorage.getItem(`cart_${tableId}`);
     if (cartData) {
       try {
         const cart = JSON.parse(cartData);
@@ -171,16 +86,22 @@ export default function MenuPage({
       }
     }
 
-    const lastActivity = localStorage.getItem(`lastActivity_${params.tableId}`);
+    const lastActivity = localStorage.getItem(`lastActivity_${tableId}`);
     const now = Date.now();
     if (lastActivity && now - parseInt(lastActivity) > 30 * 60 * 1000) {
-      localStorage.removeItem(`cart_${params.tableId}`);
+      localStorage.removeItem(`cart_${tableId}`);
       setCartItemCount(0);
     }
-    localStorage.setItem(`lastActivity_${params.tableId}`, now.toString());
+    localStorage.setItem(`lastActivity_${tableId}`, now.toString());
+
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [params.restaurantId, params.tableId]);
+  }, [restaurantId, tableId]);
+
+  if (!restaurantId || !tableId) return null;
 
   const filteredMenuItems =
     activeCategory === "all"
@@ -196,10 +117,7 @@ export default function MenuPage({
           categoryScrollRef.current.scrollLeft -
           categoryScrollRef.current.getBoundingClientRect().left -
           16;
-        categoryScrollRef.current.scrollTo({
-          left: scrollLeft,
-          behavior: "smooth",
-        });
+        categoryScrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
       }
     }
   };
@@ -208,25 +126,19 @@ export default function MenuPage({
     setSelectedMenu(menu);
     setIsModalOpen(true);
   };
-  
-
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
-      
-      
-      <NavBar tableId={params.tableId} showOrderListModal={true}>
-         {storeName}
+      <NavBar tableId={tableId} restaurantId={restaurantId} showOrderListModal>
+        {storeName}
       </NavBar>
-
-    
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div
           ref={categoryScrollRef}
           className="flex overflow-x-auto py-3 px-4 hide-scrollbar ios-scroll"
         >
-          {MOCK_CATEGORIES.map((category, index) => (
+          {categories.map((category, index) => (
             <button
               key={category.id}
               className={`category-btn whitespace-nowrap mr-2 last:mr-0 ${
@@ -303,13 +215,13 @@ export default function MenuPage({
         menu={selectedMenu}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        restaurantId={params.restaurantId}
-        tableId={params.tableId}
+        restaurantId={restaurantId}
+        tableId={tableId}
       />
 
       <div className="fixed bottom-5 inset-x-0 flex justify-center z-20">
         <Link
-          href={`/restaurant/${params.restaurantId}/table/${params.tableId}/cart`}
+          href={`/restaurant/${restaurantId}/table/${tableId}/cart`}
           className="flex items-center px-6 py-3 bg-[var(--color-primary)] text-white rounded-full shadow-lg active:scale-95 transition-transform no-highlight"
         >
           <svg
@@ -334,68 +246,6 @@ export default function MenuPage({
           )}
         </Link>
       </div>
-
-      <div
-        id="cartSuccess"
-        className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-[#FF6B35] text-white px-4 py-2 rounded-[8px] shadow-md opacity-0 translate-y-2 transition-all duration-300"
-      >
-        장바구니에 추가되었습니다
-      </div>
-
-      <style jsx global>{`
-        .animate-slide-up {
-          animation: slideUp 0.3s ease-out forwards;
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-
-        .active {
-          background-color: #ff6b35;
-          color: white;
-        }
-
-        .category-btn {
-          padding: 8px 16px;
-          border-radius: 100px;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s;
-          background-color: #f8f8f8;
-          color: #4a4a4a;
-        }
-
-        .no-highlight {
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        .ios-scroll {
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .active:scale-98 {
-          transform: scale(0.98);
-        }
-
-        .rounded-card {
-          border-radius: 12px;
-        }
-      `}</style>
     </div>
   );
 }

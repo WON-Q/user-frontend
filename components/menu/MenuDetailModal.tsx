@@ -121,7 +121,7 @@ export default function MenuDetailModal({
         {/* 상단 이미지 */}
         <div className="relative w-full h-[220px] sm:h-[300px]">
           <Image
-            src={menu.image}
+            src="/images/placeholder.png" // Use placeholder if menu.image is not available
             alt={menu.name}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"

@@ -1,6 +1,4 @@
-'use client';
-
-import { CartProvider } from '@/context/CartContext';
+import ClientCartProvider from "@/components/layout/ClientCartProvider";
 
 export default function RestaurantLayout({
   children,
@@ -10,8 +8,8 @@ export default function RestaurantLayout({
   params: { restaurantId: string; tableId: string };
 }) {
   return (
-    <CartProvider restaurantId={params.restaurantId} tableId={params.tableId}>
+    <ClientCartProvider restaurantId={params.restaurantId} tableId={params.tableId}>
       {children}
-    </CartProvider>
+    </ClientCartProvider>
   );
 }
