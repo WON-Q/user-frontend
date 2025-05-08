@@ -1,24 +1,23 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
-import { fetchMenusByMerchant, MenuResponse } from "@/lib/merchant/menu";
 import { MenuItem, MenuCategory } from "@/types/menu";
+import { fetchMenusByMerchant, MenuResponse } from "./router"; // Adjust the path to your router.js
+import Link from 'next/link'; // Ensure Link is imported correctly
 
 export default function MenuPage() {
   const pathname = usePathname();
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [tableId, setTableId] = useState<string | null>(null);
-
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [storeName, setStoreName] = useState("원큐오더 레스토랑");
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);  // 카트 항목 개수
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [loading, setIsLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -35,8 +34,10 @@ export default function MenuPage() {
 
     const fetchData = async () => {
       try {
+        // 백엔드에서 데이터 가져오기 (axios 사용)
         const menus: MenuResponse[] = await fetchMenusByMerchant(restaurantId);
 
+        // Categories 추출 (category 값이 존재하는지 체크)
         const uniqueCategories = Array.from(
           new Set(menus.map((m) => m.category))
         ).map((cat) => ({
@@ -45,6 +46,7 @@ export default function MenuPage() {
         }));
         setCategories([{ id: "all", name: "전체" }, ...uniqueCategories]);
 
+        // 메뉴 항목 처리 (MenuResponse 타입을 MenuItem으로 변환)
         const parsedMenus: MenuItem[] = menus.map((menu) => ({
           id: menu.menuId,
           name: menu.name,
@@ -72,26 +74,18 @@ export default function MenuPage() {
 
     fetchData();
 
-    const cartData = localStorage.getItem(`cart_${tableId}`);
-    if (cartData) {
-      try {
-        const cart = JSON.parse(cartData);
-        const count = cart.reduce(
-          (sum: number, item: any) => sum + item.quantity,
-          0
-        );
-        setCartItemCount(count);
-      } catch (e) {
-        console.error("장바구니 데이터 처리 오류", e);
-      }
-    }
-
+    // 카트 데이터 가져오기
     const lastActivity = localStorage.getItem(`lastActivity_${tableId}`);
     const now = Date.now();
     if (lastActivity && now - parseInt(lastActivity) > 30 * 60 * 1000) {
-      localStorage.removeItem(`cart_${tableId}`);
+      localStorage.removeItem(`cart_${restaurantId}_${tableId}`);
       setCartItemCount(0);
     }
+
+    // 카트 개수 업데이트
+    const cart = JSON.parse(localStorage.getItem(`cart_${restaurantId}_${tableId}`) || "[]");
+    setCartItemCount(cart.length);
+
     localStorage.setItem(`lastActivity_${tableId}`, now.toString());
 
     const timer = setTimeout(() => {
@@ -203,9 +197,7 @@ export default function MenuPage() {
                   d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              <p className="mt-4 text-gray-500">
-                해당 카테고리에 메뉴가 없습니다
-              </p>
+              <p className="mt-4 text-gray-500">해당 카테고리에 메뉴가 없습니다</p>
             </div>
           )}
         </div>
@@ -219,10 +211,10 @@ export default function MenuPage() {
         tableId={tableId}
       />
 
-      <div className="fixed bottom-5 inset-x-0 flex justify-center z-20">
+      <div className="fixed bottom-5 inset-x-4 flex justify-center z-20">
         <Link
           href={`/restaurant/${restaurantId}/table/${tableId}/cart`}
-          className="flex items-center px-6 py-3 bg-[var(--color-primary)] text-white rounded-full shadow-lg active:scale-95 transition-transform no-highlight"
+          className="flex items-center px-6 py-3 bg-[var(--color-primary)] text-white rounded-full shadow-lg active:scale-95 transition-transform no-highlight max-w-[calc(100%-32px)]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -239,11 +231,11 @@ export default function MenuPage() {
             />
           </svg>
           장바구니 보기
-          {cartItemCount > 0 && (
-            <span className="ml-2 bg-white text-primary rounded-full h-6 w-6 flex items-center justify-center text-sm font-semibold">
+          {/* {cartItemCount > 0 && (
+            <span className="ml-2 bg-red text-primary rounded-full h-6 w-6 flex items-center justify-center text-sm font-semibold">
               {cartItemCount}
             </span>
-          )}
+          )} */}
         </Link>
       </div>
     </div>

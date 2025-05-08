@@ -37,3 +37,5 @@ export interface CartItem {
   options?: { [key: string]: string };
   image?: string;
 }
+
+
