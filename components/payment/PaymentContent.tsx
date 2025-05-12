@@ -109,7 +109,6 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
     }
   };
   
-  
 
   if (items.length === 0) {
     return (

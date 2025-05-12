@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation"; // ✅ Import useRouter
 
 interface OrderItem {
   id: number;
@@ -21,6 +22,7 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
   const [mounted, setMounted] = useState(false);
   const [orders, setOrders] = useState<Record<string, OrderItem[]>>({});
   const modalRef = useRef<HTMLDivElement>(null);
+  const router = useRouter(); // ✅ Initialize useRouter
 
   useEffect(() => {
     setMounted(true);
@@ -113,14 +115,18 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
                 <ul className="space-y-2">
                   {orderList.map((order, idx) => (
                     <li key={idx} className="flex justify-between text-sm">
-                      <span>
-                        {order.name} x {order.quantity}
-                        {order.options && Object.keys(order.options).length > 0 && (
-                          <span className="text-gray-500 text-xs ml-1">
-                            ({Object.entries(order.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
-                          </span>
-                        )}
+                      <span
+                        className="text-primary font-medium cursor-pointer hover:underline"
+                        onClick={() => router.push(`/review/${order.id}`)} // ✅ Make menu name clickable
+                      >
+                        {order.name}
                       </span>
+                      <span className="text-gray-500 ml-1">x {order.quantity}</span>
+                      {order.options && Object.keys(order.options).length > 0 && (
+                        <span className="text-gray-500 text-xs ml-1">
+                          ({Object.entries(order.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
+                        </span>
+                      )}
                       <span>{(order.price * order.quantity).toLocaleString()}원</span>
                     </li>
                   ))}
