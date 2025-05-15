@@ -128,6 +128,28 @@ export default function MenuPage() {
       </NavBar>
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
+        <div className="px-4 pt-3">
+          <div
+            onClick={() => window.location.href = `/restaurant/${restaurantId}/review`}
+            className="flex items-center justify-center bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 ease-out transform hover:scale-[1.02] animate-fade-slide w-full"
+          >
+            <div className="flex items-center justify-center">
+              <img
+                src="/images/review-icon.png"
+                alt="리뷰"
+                className="w-10 h-10 mr-3"
+              />
+              <div className="flex flex-col items-start justify-center">
+                <span className="text-sm font-semibold text-gray-900">
+                  리뷰 작성하고 포인트 받기
+                </span>
+                <span className="text-[13px] text-[var(--color-primary)] font-semibold">
+                  쏠쏠하게 쌓이는 포인트
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
           ref={categoryScrollRef}
           className="flex overflow-x-auto py-3 px-4 hide-scrollbar ios-scroll"

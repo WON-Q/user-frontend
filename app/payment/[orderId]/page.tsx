@@ -9,9 +9,8 @@ export default function PaymentPage({ params }: { params: { orderId: string } })
   const restaurantId = searchParams.get("restaurantId") || "1";
   const tableId = searchParams.get("tableId") || "1";
 
+  console.log("orderId:", params.orderId); // Log the orderId
 
-
-  
   return (
     <CartProvider restaurantId={restaurantId} tableId={tableId}>
       <PaymentContent orderId={params.orderId} />

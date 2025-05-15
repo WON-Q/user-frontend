@@ -19,7 +19,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
     setLoading(true);
 
     // 기본값
-    const fallbackOrderId = "1";
+    const fallbackOrderId = "o1";
     const fallbackCallbackUrl = `http://localhost:3000/payment/${fallbackOrderId}?restaurantId=${restaurantId}&tableId=${tableId}`;
 
     try {
