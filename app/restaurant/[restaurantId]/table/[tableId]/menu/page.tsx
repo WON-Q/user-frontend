@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
@@ -11,6 +11,7 @@ import Link from 'next/link'; // Ensure Link is imported correctly
 
 export default function MenuPage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [tableId, setTableId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -22,12 +23,18 @@ export default function MenuPage() {
   const [loading, setIsLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     const parts = pathname.split("/");
     setRestaurantId(parts[2] || null);
     setTableId(parts[4] || null);
-  }, [pathname]);
+
+    // Check for payment status in query parameters
+    if (searchParams.get("paymentStatus") === "success") {
+      setShowPaymentModal(true);
+    }
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!restaurantId || !tableId) return;
@@ -126,6 +133,21 @@ export default function MenuPage() {
       <NavBar tableId={tableId} restaurantId={restaurantId} showOrderListModal>
         {storeName}
       </NavBar>
+
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">결제가 완료되었습니다!</h2>
+            <p className="text-gray-600 mb-4">주문이 성공적으로 완료되었습니다.</p>
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)]"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div className="px-4 pt-3">

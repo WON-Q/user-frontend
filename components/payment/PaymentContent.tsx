@@ -70,45 +70,39 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
     e.preventDefault();
     setProcessing(true);
     setPaymentError(null);
-  
+
     try {
-      const generatedOrderId = generateOrderId(tableId); // 주문 ID 생성
-  
-      const orderPayload = {
-        order_id: generatedOrderId,
-        totalAmount: totalAmount,
-        items: items.map((item) => ({
-          menuId: item.id,
-          quantity: item.quantity,
-          options: item.options || {},
-        })),
-      };
-  
-      // 💡 실제 API 호출 (지금은 mock)
-      // await fetch("/api/order", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(orderPayload),
-      // });
-  
-      // ✅ 기존 cart 삭제
+      // 💡 실제 결제 요청 (현재는 주석 처리)
+      /*
+      const payRes = await fetch("http://localhost:8080/api/v1/pg/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          merchantId: Number(restaurantId),
+          amount: totalAmount,
+          payMethod: paymentMethod,
+        }),
+      });
+
+      const payData = await payRes.json();
+      if (!payRes.ok) throw new Error(payData.message || "결제 요청 실패");
+
+      // ✅ 결제 성공 시 리다이렉트 URL로 이동
+      window.location.href = payData.redirectUrl; // 예: "https://wooricard.com/..."
+      */
+
+      // ✅ 결제 중 페이지로 전환
+      router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&processing=true`);
+
+      // ✅ 장바구니 클리어
       clearCart();
-  
-      // ✅ 새로 생성한 order_id로 cart 저장
-      localStorage.setItem(
-        `${generatedOrderId}`,
-        JSON.stringify(items)
-      );
-  
-      // 🔄 메뉴 페이지 이동
-      router.push(`/restaurant/${restaurantId}/table/${tableId}/menu`);
     } catch (error) {
       console.error(error);
-      setPaymentError("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
       setProcessing(false);
     }
   };
-  
 
   if (items.length === 0) {
     return (

@@ -1,32 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
 export default function PaymentProcessingPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const [progress, setProgress] = useState(0);
+  const orderId = searchParams.get("orderId");
+  const restaurantId = searchParams.get("restaurantId");
+  const processing = searchParams.get("processing");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          router.push("/payment/complete");
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 500);
+    if (!orderId || !restaurantId || !processing) {
+      console.error("Missing required query parameters.");
+      return;
+    }
 
-    return () => clearInterval(interval);
-  }, [router]);
+    const checkPaymentStatus = async () => {
+      try {
+        // Simulate API call to check payment status
+        const response = await fetch(`http://localhost:8080/api/v1/pg/status?orderId=${orderId}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "결제 상태 확인 실패");
+
+        if (data.status === "success") {
+          router.push(`/payment/complete?orderId=${orderId}&restaurantId=${restaurantId}`);
+        } else {
+          alert("결제가 실패했습니다. 다시 시도해주세요.");
+        }
+      } catch (error) {
+        console.error("결제 상태 확인 중 오류:", error);
+        alert("결제 상태 확인 중 오류가 발생했습니다.");
+      }
+    };
+
+    checkPaymentStatus();
+  }, [orderId, restaurantId, processing, router]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md space-y-8 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6">
+      <div className="w-full max-w-md text-center space-y-6">
         <div className="flex justify-center">
           <Image
             src="/placeholder.svg?height=80&width=80"
@@ -37,21 +52,16 @@ export default function PaymentProcessingPage() {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800">결제 중입니다</h1>
+        <h1 className="text-2xl font-bold text-gray-800">결제 진행 중</h1>
 
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200">
-          <div
-            className="absolute left-0 top-0 h-full bg-[#2AC1BC] transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          ></div>
+        <div className="flex justify-center">
+          <div className="flex items-center justify-center w-12 h-12">
+            <Loader2 className="h-12 w-12 animate-spin text-[#2AC1BC]" />
+          </div>
         </div>
 
-        <div className="flex items-center justify-center space-x-2 text-gray-600">
-          <Loader2 className="h-5 w-5 animate-spin text-[#2AC1BC]" />
-          <p>잠시만 기다려주세요...</p>
-        </div>
-
-        <p className="text-sm text-gray-500">결제가 진행 중입니다. 페이지를 닫지 마세요.</p>
+        <p className="text-base text-gray-600">잠시만 기다려주세요...</p>
+        <p className="text-sm text-gray-500">결제 처리 중입니다. 페이지를 닫지 마세요.</p>
       </div>
     </div>
   );
