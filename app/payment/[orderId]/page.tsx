@@ -1,19 +1,20 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { CartProvider } from "@/context/CartContext";
 import PaymentContent from "../../../components/payment/PaymentContent";
 
-export default function PaymentPage({ params }: { params: { orderId: string } }) {
+export default function PaymentPage() {
+  const params = useParams(); // ✅ 훅으로 접근
   const searchParams = useSearchParams();
+
+  const orderId = typeof params.orderId === "string" ? params.orderId : Array.isArray(params.orderId) ? params.orderId[0] : "";
   const restaurantId = searchParams.get("restaurantId") || "1";
   const tableId = searchParams.get("tableId") || "1";
 
-  console.log("orderId:", params.orderId); // Log the orderId
-  console.log(restaurantId, tableId); // Log the restaurantId and tableId
   return (
     <CartProvider restaurantId={restaurantId} tableId={tableId}>
-      <PaymentContent orderId={params.orderId} />
+      <PaymentContent orderId={orderId} />
     </CartProvider>
   );
 }

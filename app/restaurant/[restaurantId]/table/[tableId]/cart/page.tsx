@@ -1,37 +1,42 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import NavBar from "@/components/navbar/NavBar";
 import CartItem from "@/components/cart/CartItem";
-
 import EmptyCart from "@/components/cart/EmptyCart";
 import CartButtons from "@/components/cart/CartButtons";
 import { useCart } from "@/context/CartContext";
 
-export default function CartPage({
-  params,
-}: {
-  params: { restaurantId: string; tableId: string };
-}) {
-  const { restaurantId, tableId } = params;
+export default function CartPage() {
+  const params = useParams(); // ✅ useParams로 동기 접근
+  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [tableId, setTableId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const {
     items,
     updateQuantity,
     removeItem,
     clearCart,
   } = useCart();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 초기 로딩 시뮬레이션
+    // ✅ useParams로 꺼낸 값은 문자열 배열일 수 있으니 예외 처리 필요
+    if (params && typeof params.restaurantId === "string" && typeof params.tableId === "string") {
+      setRestaurantId(params.restaurantId);
+      setTableId(params.tableId);
+    }
+  }, [params]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 0);
-
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || !restaurantId || !tableId) {
     return (
       <div className="flex flex-col min-h-screen bg-blue-white items-center justify-center p-4">
         <svg
@@ -61,18 +66,15 @@ export default function CartPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white">
-     
-     <NavBar restaurantId={restaurantId} tableId={tableId} type="back" showOrderListModal={false}>
-      장바구니
-    </NavBar>
-
+      <NavBar restaurantId={restaurantId} tableId={tableId} type="back" showOrderListModal={false}>
+        장바구니
+      </NavBar>
 
       <div className="flex-1 px-4 py-6">
         {items.length === 0 ? (
           <EmptyCart restaurantId={restaurantId} tableId={tableId} />
         ) : (
           <>
-            {/* 장바구니 아이템 목록 */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold text-lg text-gray-800">주문 목록</h2>
@@ -100,17 +102,14 @@ export default function CartPage({
                   <CartItem
                     key={`${item.id}-${JSON.stringify(item.options)}`}
                     item={item}
-                    onQuantityChange={(quantity) => updateQuantity(index, quantity)} // Pass index-based callback
-                    onRemove={() => removeItem(index)} // Pass index-based callback
+                    onQuantityChange={(quantity) => updateQuantity(index, quantity)}
+                    onRemove={() => removeItem(index)}
                   />
                 ))}
               </div>
             </div>
 
-            <CartButtons
-              restaurantId={restaurantId}
-              tableId={tableId}
-            />
+            <CartButtons restaurantId={restaurantId} tableId={tableId} />
           </>
         )}
       </div>

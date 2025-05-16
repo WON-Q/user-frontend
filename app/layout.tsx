@@ -1,12 +1,10 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
+// ✅ metadata 객체 안에는 viewport와 themeColor를 빼고 설정
 export const metadata: Metadata = {
   title: "원큐오더 - 한 번에 주문하세요",
   description: "우리카드로 한 큐에 주문하는 간편한 주문 서비스",
-  viewport:
-    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-  themeColor: "#FF6B35",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -16,6 +14,17 @@ export const metadata: Metadata = {
     telephone: true,
   },
 };
+
+// ✅ viewport는 따로 export
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // ✅ string 말고 boolean 사용
+};
+
+// ✅ themeColor도 따로 export
+export const themeColor = "#FF6B35";
 
 export default function RootLayout({
   children,

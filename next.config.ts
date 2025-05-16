@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {
                 protocol: "https",
-                hostname: "picsum.photos",
+                hostname: "won-q-order-merchant.s3.ap-northeast-2.amazonaws.com",
                 port: "",
                 pathname: "/**",
             },
