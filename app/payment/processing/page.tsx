@@ -12,6 +12,10 @@ export default function PaymentProcessingPage() {
   const restaurantId = searchParams.get("restaurantId");
   const processing = searchParams.get("processing");
 
+  console.log("orderId:", orderId); // Log the orderId
+  console.log("restaurantId:", restaurantId); // Log the restaurantId
+  console.log("processing:", processing); // Log the processing flag
+
   useEffect(() => {
     if (!orderId || !restaurantId || !processing) {
       console.error("Missing required query parameters.");
@@ -42,24 +46,16 @@ export default function PaymentProcessingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6">
       <div className="w-full max-w-md text-center space-y-6">
+        <h1 className="text-2xl font-bold text-gray-800">결제 진행 중</h1>
         <div className="flex justify-center">
           <Image
-            src="/placeholder.svg?height=80&width=80"
+            src="/images/Payment-Process.gif"
             alt="Baemin logo"
-            width={80}
-            height={80}
+            width={200}
+            height={200}
             className="rounded-xl"
           />
         </div>
-
-        <h1 className="text-2xl font-bold text-gray-800">결제 진행 중</h1>
-
-        <div className="flex justify-center">
-          <div className="flex items-center justify-center w-12 h-12">
-            <Loader2 className="h-12 w-12 animate-spin text-[#2AC1BC]" />
-          </div>
-        </div>
-
         <p className="text-base text-gray-600">잠시만 기다려주세요...</p>
         <p className="text-sm text-gray-500">결제 처리 중입니다. 페이지를 닫지 마세요.</p>
       </div>

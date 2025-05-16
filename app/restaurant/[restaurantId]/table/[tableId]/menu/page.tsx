@@ -8,6 +8,7 @@ import NavBar from "@/components/navbar/NavBar";
 import { MenuItem, MenuCategory } from "@/types/menu";
 import { fetchMenusByMerchant, MenuResponse } from "./router"; // Adjust the path to your router.js
 import Link from 'next/link'; // Ensure Link is imported correctly
+import ReviewListModal from "@/components/review/ReviewListModal";
 
 export default function MenuPage() {
   const pathname = usePathname();
@@ -24,6 +25,7 @@ export default function MenuPage() {
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     const parts = pathname.split("/");
@@ -134,6 +136,13 @@ export default function MenuPage() {
         {storeName}
       </NavBar>
 
+      {/* Review Modal */}
+      <ReviewListModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        tableId={tableId || ""}
+      />
+
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 shadow-lg text-center">
@@ -152,7 +161,7 @@ export default function MenuPage() {
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
         <div className="px-4 pt-3">
           <div
-            onClick={() => window.location.href = `/restaurant/${restaurantId}/review`}
+            onClick={() => setIsReviewModalOpen(true)}
             className="flex items-center justify-center bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 ease-out transform hover:scale-[1.02] animate-fade-slide w-full"
           >
             <div className="flex items-center justify-center">

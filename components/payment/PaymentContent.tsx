@@ -55,18 +55,8 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
     setFormData((prev) => ({ ...prev, [name]: formatted }));
   };
 
-  const generateOrderId = (tableId: string | null) => {
-    const now = new Date();
-    const yy = now.getFullYear().toString().slice(2); // 연도 2자리
-    const MM = (now.getMonth() + 1).toString().padStart(2, "0"); // 월
-    const dd = now.getDate().toString().padStart(2, "0"); // 일
-    const HH = now.getHours().toString().padStart(2, "0"); // 시
-    const mm = now.getMinutes().toString().padStart(2, "0"); // 분
   
-    return `${yy}${MM}${dd}T${HH}${mm}_t${tableId}`;
-  };
-  
-  const handlePayment = async (e: React.FormEvent) => {
+    const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
     setPaymentError(null);
