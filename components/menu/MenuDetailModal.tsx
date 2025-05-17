@@ -85,11 +85,16 @@ export default function MenuDetailModal({
   const handleAddToCart = () => {
     if (menu) {
       const optionsForCart: { [key: string]: string } = {};
+      const optionIdsForCart: number[] = [];
+
       Object.entries(selectedOptions).forEach(([title, option]) => {
         optionsForCart[title] = option.name;
+        if (option.optionId !== undefined) {
+          optionIdsForCart.push(option.optionId);
+        }
       });
 
-      addItem(menu, quantity, optionsForCart);
+      addItem(menu, quantity, optionsForCart, optionIdsForCart);
 
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
@@ -112,7 +117,6 @@ export default function MenuDetailModal({
 
   if (!isOpen || !menu) return null;
 
-  // 이미지 URL이 없을 경우, 기본 이미지로 대체
   const imageUrl = menu.image || "/images/placeholder.png";
 
   return (
@@ -259,7 +263,6 @@ export default function MenuDetailModal({
           </div>
         </div>
 
-        {/* 하단 주문 금액 + 버튼 */}
         <div className="p-4 border-t border-gray-200 bg-white">
           <div className="flex justify-between items-center mb-3">
             <span className="font-semibold text-lg text-gray-900">총 주문금액</span>
@@ -278,3 +281,4 @@ export default function MenuDetailModal({
     </div>
   );
 }
+  

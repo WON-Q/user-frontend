@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -11,63 +10,53 @@ interface CartButtonsProps {
 }
 
 export default function CartButtons({ restaurantId, tableId }: CartButtonsProps) {
-  const { items, totalAmount, clearCart } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleOrder = async () => {
     setLoading(true);
 
-    // 기본값
-    const fallbackOrderId = "1";
-    const fallbackCallbackUrl = `http://localhost:3000/payment/${fallbackOrderId}?restaurantId=${restaurantId}&tableId=${tableId}`;
-
     try {
-      const menus = items.map((item) => ({
+      const cartKey = `cart_${restaurantId}_${tableId}`;
+      const cartData = localStorage.getItem(cartKey);
+      if (!cartData) throw new Error("로컬스토리지에 장바구니 데이터가 없습니다.");
+
+      const parsedCart = JSON.parse(cartData);
+      const menus = parsedCart.map((item: any) => ({
         menuId: item.id,
         quantity: item.quantity,
-        optionIds: item.options ? Object.values(item.options).map(Number) : [],
+        optionIds: item.optionIds || [], // ✅ 옵션 ID 직접 사용
       }));
 
-      const orderRes = await fetch("http://localhost:8080/api/v1/order", {
+      const requestBody = {
+        tableId: Number(tableId),
+        menus,
+        paymentMethod: "CARD",
+      };
+
+      console.log("📤 주문 준비 요청:");
+      console.log("➡️ URL:", "http://localhost:8080/api/v1/orders/prepare");
+      console.log("➡️ Method:", "POST");
+      console.log("➡️ Headers:", { "Content-Type": "application/json;charset=UTF-8" });
+      console.log("➡️ Body:", requestBody);
+
+      const response = await fetch("http://localhost:8080/api/v1/orders/prepare", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          merchantId: Number(restaurantId),
-          tableId: Number(tableId),
-          amount: totalAmount,
-          menus,
-        }),
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify(requestBody),
+        credentials: "include",
       });
 
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.message || "주문 생성 실패");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "주문 생성 실패");
 
-      const { orderId, merchantId, amount } = orderData;
+      console.log("✅ 주문 준비 완료:", result.data.orderCode);
 
-      const pgRes = await fetch("http://localhost:8080/api/v1/pg/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          merchantId,
-          amount,
-        }),
-      });
-
-      const pgData = await pgRes.json();
-      if (!pgRes.ok) throw new Error(pgData.message || "결제 생성 실패");
-
-      if (pgData.callbackUrl) {
-        router.push(pgData.callbackUrl);
-      } else {
-        // 백엔드가 응답했지만 callbackUrl이 없을 때
-        console.warn("callbackUrl 누락 → fallback으로 이동");
-        router.push(fallbackCallbackUrl);
-      }
+      // 다음 페이지 이동 예시
+      // router.push(`/payment/${result.data.orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
     } catch (err) {
-      console.warn("백엔드 호출 실패 → fallback으로 이동:", err);
-      router.push(fallbackCallbackUrl);
+      console.error("🚨 주문 준비 중 오류:", err);
+      alert("주문 처리에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -79,17 +68,8 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
         href={`/restaurant/${restaurantId}/table/${tableId}/menu`}
         className="flex-1 h-12 border border-[var(--color-primary)] text-[var(--color-primary)] rounded-xl flex items-center justify-center font-medium transition-colors hover:bg-[var(--color-primary-light)]"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-1"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-            clipRule="evenodd"
-          />
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
         </svg>
         메뉴 추가
       </Link>

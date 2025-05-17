@@ -35,17 +35,17 @@ export default function NavBar({
       <div className="flex items-center justify-between">
         {/* 왼쪽: 로고 or 뒤로가기 */}
         <div className="flex items-center">
-          {type === "back" ? (
-            <button onClick={handleBack} aria-label="뒤로가기">
-              <img src="/back.svg" alt="Back" className="w-6 h-6" />
-            </button>
-          ) : (
-            <img
-              src={storeImgUrl || "/images/store-logo.png"} // Use storeImgUrl or fallback
-              alt="Store Logo"
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          )}
+              {type === "back" ? (
+          <button onClick={handleBack} aria-label="뒤로가기">
+            <img src="/back.svg" alt="Back" className="w-6 h-6" />
+          </button>
+        ) : storeImgUrl ? (
+          <img
+            src={storeImgUrl}
+            alt="Store Logo"
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        ) : null}
           {children === "장바구니" ? (
             <h1 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 font-bold text-[20px] text-[#1A1A1A]">
               {children}

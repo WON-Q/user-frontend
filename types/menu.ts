@@ -5,7 +5,7 @@ export interface MenuItem {
   image: string;
   description: string;
   categoryId: string;
-  badge?: string;
+  badge?: string; // Optional badge for recommended items
   options?: MenuOptionGroup[];
 }
 
@@ -18,6 +18,7 @@ export interface MenuOptionGroup {
 export interface MenuOption {
   name: string;
   price: number;
+  optionId: number; // Ensure this matches the backend structure
 }
 
 export interface MenuCategory {
@@ -34,8 +35,8 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  options?: { [key: string]: string };
+  options?: { [key: string]: string }; // Name-based options for display
+  optionIds?: number[]; // Option IDs for backend requests
   image?: string;
 }
-
 

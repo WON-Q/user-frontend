@@ -9,13 +9,19 @@ export interface CartItem {
   price: number;
   quantity: number;
   options?: { [key: string]: string };
+  optionIds?: number[]; // ✅ 옵션 ID 추가
   image?: string;
   totalPrice: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: MenuItem, quantity: number, options?: { [key: string]: string }) => void;
+  addItem: (
+    item: MenuItem,
+    quantity: number,
+    options?: { [key: string]: string },
+    optionIds?: number[] // ✅ 시그니처에 추가
+  ) => void;
   removeItem: (index: number) => void;
   updateQuantity: (itemId: number, quantity: number) => void;
   clearCart: () => void;
@@ -33,9 +39,8 @@ interface CartProviderProps {
 
 export function CartProvider({ children, restaurantId, tableId }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [initialized, setInitialized] = useState(false); 
+  const [initialized, setInitialized] = useState(false);
 
-  // 로컬 스토리지에서 장바구니 데이터 로드
   useEffect(() => {
     const cartKey = `cart_${restaurantId}_${tableId}`;
     const savedCart = localStorage.getItem(cartKey);
@@ -46,26 +51,32 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
         console.error('장바구니 데이터 로드 오류:', e);
       }
     }
-    setInitialized(true); // ✅ 데이터 로드 완료 후 초기화됨
+    setInitialized(true);
   }, [restaurantId, tableId]);
 
-  // 장바구니 데이터가 변경될 때만 로컬 스토리지에 저장
   useEffect(() => {
-    if (!initialized) return; // 초기화 전에는 저장하지 않음
+    if (!initialized) return;
 
     const cartKey = `cart_${restaurantId}_${tableId}`;
     localStorage.setItem(cartKey, JSON.stringify(items));
   }, [items, restaurantId, tableId, initialized]);
 
-  const addItem = (menuItem: MenuItem, quantity: number, options?: { [key: string]: string }) => {
+  const addItem = (
+    menuItem: MenuItem,
+    quantity: number,
+    options?: { [key: string]: string },
+    optionIds?: number[] // ✅ 추가
+  ) => {
     setItems(currentItems => {
       const optionsKey = options ? JSON.stringify(options) : '';
+      const optionIdsKey = optionIds ? JSON.stringify(optionIds) : '';
 
       const existingItemIndex = currentItems.findIndex(item => 
-        item.id === menuItem.id && JSON.stringify(item.options) === optionsKey
+        item.id === menuItem.id &&
+        JSON.stringify(item.options) === optionsKey &&
+        JSON.stringify(item.optionIds || []) === optionIdsKey
       );
 
-      // ✅ 옵션 가격 계산
       const optionTotalPrice = menuItem.options
         ?.reduce((sum, optGroup) => {
           const selectedOptionName = options?.[optGroup.title];
@@ -73,22 +84,23 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
           return sum + (selectedOption?.price || 0);
         }, 0) || 0;
 
-      const finalUnitPrice = menuItem.price + optionTotalPrice; // 옵션 포함 단가
+      const finalUnitPrice = menuItem.price + optionTotalPrice;
       const totalPrice = finalUnitPrice * quantity;
 
       if (existingItemIndex >= 0) {
         const updatedItems = [...currentItems];
         const item = updatedItems[existingItemIndex];
         item.quantity += quantity;
-        item.totalPrice = finalUnitPrice * item.quantity; // ✅ 옵션 포함된 가격으로 다시 계산
+        item.totalPrice = finalUnitPrice * item.quantity;
         return updatedItems;
       } else {
         return [...currentItems, {
           id: menuItem.id,
           name: menuItem.name,
-          price: finalUnitPrice, // ✅ 옵션 포함된 가격 저장
+          price: finalUnitPrice,
           quantity,
           options,
+          optionIds, // ✅ 저장
           image: menuItem.image,
           totalPrice
         }];
@@ -99,19 +111,19 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
   const removeItem = (index: number) => {
     setItems(currentItems => {
       const updatedItems = [...currentItems];
-      updatedItems.splice(index, 1); // Remove one item at the given index
+      updatedItems.splice(index, 1);
       return updatedItems;
     });
   };
 
   const updateQuantity = (index: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-  
+
     setItems((currentItems) => {
       const updatedItems = [...currentItems];
       const item = updatedItems[index];
       if (!item) return currentItems;
-  
+
       item.quantity = newQuantity;
       item.totalPrice = item.price * newQuantity;
       return updatedItems;

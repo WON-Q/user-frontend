@@ -66,12 +66,14 @@ export default function MenuPage() {
           price: menu.price,
           image: menu.menuImgUrl,
           categoryId: menu.category.toLowerCase(),
+          badge: menu.isAvailable ? "추천" : undefined, // Optional badge
           options: menu.optionGroups.map((group) => ({
             title: group.groupName,
             required: group.isDefault,
             items: group.options.map((opt) => ({
               name: opt.optionName,
               price: opt.optionPrice,
+              optionId: opt.optionId, // Ensure this matches the MenuOption interface
             })),
           })),
         }));
