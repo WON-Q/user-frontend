@@ -6,7 +6,7 @@ import MenuCard from "@/components/menu/MenuCard";
 import MenuDetailModal from "@/components/menu/MenuDetailModal";
 import NavBar from "@/components/navbar/NavBar";
 import { MenuItem, MenuCategory } from "@/types/menu";
-import { fetchMenusByMerchant, MenuResponse } from "./router"; // Adjust the path to your router.js
+import { fetchMenusByMerchant, fetchMerchantOverview, MenuResponse } from "./router"; // Adjust the path to your router.js
 import Link from 'next/link'; // Ensure Link is imported correctly
 import ReviewListModal from "@/components/review/ReviewListModal";
 
@@ -18,7 +18,9 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
-  const [storeName, setStoreName] = useState("원큐오더 레스토랑");
+ const [storeName, setStoreName] = useState<string | null>(null);
+  const [storeImgUrl, setStoreImgUrl] = useState<string | null>(null); // 💡 Add state for store image URL
+
   const [cartItemCount, setCartItemCount] = useState(0);  // 카트 항목 개수
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [loading, setIsLoading] = useState(true);
@@ -43,10 +45,12 @@ export default function MenuPage() {
 
     const fetchData = async () => {
       try {
-        // 백엔드에서 데이터 가져오기 (axios 사용)
-        const menus: MenuResponse[] = await fetchMenusByMerchant(restaurantId);
+        const [menus, merchant] = await Promise.all([
+          fetchMenusByMerchant(restaurantId), // Fetch menus
+          fetchMerchantOverview(restaurantId), // Fetch merchant overview
+        ]);
 
-        // Categories 추출 (category 값이 존재하는지 체크)
+        // Process menus
         const uniqueCategories = Array.from(
           new Set(menus.map((m) => m.category))
         ).map((cat) => ({
@@ -55,7 +59,6 @@ export default function MenuPage() {
         }));
         setCategories([{ id: "all", name: "전체" }, ...uniqueCategories]);
 
-        // 메뉴 항목 처리 (MenuResponse 타입을 MenuItem으로 변환)
         const parsedMenus: MenuItem[] = menus.map((menu) => ({
           id: menu.menuId,
           name: menu.name,
@@ -72,10 +75,13 @@ export default function MenuPage() {
             })),
           })),
         }));
-
         setMenuItems(parsedMenus);
-      } catch (error) {
-        console.error("메뉴 불러오기 실패", error);
+
+        // Update store name and image
+        setStoreName(merchant.merchantName);
+        setStoreImgUrl(merchant.merchantImgUrl); // 💡 Set store image URL
+      } catch (e) {
+        console.error("가맹점/메뉴 데이터 로딩 실패", e);
       } finally {
         setIsLoading(false);
       }
@@ -83,7 +89,7 @@ export default function MenuPage() {
 
     fetchData();
 
-    // 카트 데이터 가져오기
+    // Handle cart-related logic
     const lastActivity = localStorage.getItem(`lastActivity_${tableId}`);
     const now = Date.now();
     if (lastActivity && now - parseInt(lastActivity) > 30 * 60 * 1000) {
@@ -91,17 +97,10 @@ export default function MenuPage() {
       setCartItemCount(0);
     }
 
-    // 카트 개수 업데이트
     const cart = JSON.parse(localStorage.getItem(`cart_${restaurantId}_${tableId}`) || "[]");
     setCartItemCount(cart.length);
 
     localStorage.setItem(`lastActivity_${tableId}`, now.toString());
-
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
   }, [restaurantId, tableId]);
 
   if (!restaurantId || !tableId) return null;
@@ -132,7 +131,12 @@ export default function MenuPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-blue-white pb-20">
-      <NavBar tableId={tableId} restaurantId={restaurantId} showOrderListModal>
+      <NavBar
+        tableId={tableId}
+        restaurantId={restaurantId}
+        showOrderListModal
+        storeImgUrl={storeImgUrl} // 💡 Pass store image URL to NavBar
+      >
         {storeName}
       </NavBar>
 

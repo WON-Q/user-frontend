@@ -8,6 +8,7 @@ interface NavBarProps {
   children: ReactNode;
   type?: "back" | "logo";
   showOrderListModal?: boolean; // New prop to control modal visibility
+  storeImgUrl?: string | null; // Add store image URL prop
 }
 
 export default function NavBar({
@@ -16,6 +17,7 @@ export default function NavBar({
   children,
   type = "logo",
   showOrderListModal = false,
+  storeImgUrl, // Destructure storeImgUrl
 }: NavBarProps) {
   const router = useRouter();
   const [isOrderModalOpen, setOrderModalOpen] = useState(false);
@@ -39,9 +41,9 @@ export default function NavBar({
             </button>
           ) : (
             <img
-              src="/images/store-logo.png"
+              src={storeImgUrl || "/images/store-logo.png"} // Use storeImgUrl or fallback
               alt="Store Logo"
-              className="w-8 h-8 rounded-full"
+              className="w-8 h-8 rounded-full object-cover"
             />
           )}
           {children === "장바구니" ? (
