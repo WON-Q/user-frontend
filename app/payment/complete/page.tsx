@@ -70,6 +70,22 @@ export default function PaymentCompletePage() {
           </div>
         </div>
 
+        {/* 우리카드 홍보 영역 */}
+        <div className="rounded-xl bg-[#FFF8E8] border border-[#FFD4A3] p-4 flex items-center space-x-4 shadow-sm">
+          <img
+            src="/images/우리카드.png" // 💡 S3나 public 폴더 이미지 경로
+            alt="우리카드 신규 발급"
+            className="w-16 h-16 rounded-lg object-contain"
+          />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-[#FF6B35] mb-1">우리카드의정석 EVERY DISCOUNT</p>
+            <p className="text-xs text-[#4A4A4A]">
+              온라인 간편결제 2% 할인, 첫 결제 시 1,000P 지급 🎁
+            </p>
+          </div>
+          
+        </div>
+
         <div className="space-y-3">
           <button className="w-full py-3 bg-[#FF6B35] text-white rounded-lg hover:bg-[#C75000]">
             주문 상세 보기

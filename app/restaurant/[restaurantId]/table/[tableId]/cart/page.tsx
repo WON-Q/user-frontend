@@ -75,6 +75,20 @@ export default function CartPage() {
           <EmptyCart restaurantId={restaurantId} tableId={tableId} />
         ) : (
           <>
+            <div className="mb-4 px-3 py-2 bg-orange-50 rounded-lg animate-fade-slide-in">
+              <div className="flex items-center">
+                <img
+                  src="/images/wooripay-icon.png"
+                  alt="우리페이"
+                  className="w-10 h-10 mr-3"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">우리페이로 결제하면 특별한 혜택이!</p>
+                  <p className="text-xs text-gray-500 mt-0.5">적립, 할인, 사은품 제공까지 다양한 혜택을 누려보세요.</p>
+                </div>
+              </div>
+            </div>
+
             <div className="mb-6">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold text-lg text-gray-800">주문 목록</h2>
@@ -107,6 +121,9 @@ export default function CartPage() {
                   />
                 ))}
               </div>
+
+
+             
             </div>
 
             <CartButtons restaurantId={restaurantId} tableId={tableId} />

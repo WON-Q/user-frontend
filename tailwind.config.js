@@ -42,6 +42,20 @@ module.exports = {
         button: "8px",
         card: "12px",
       },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-out',
+        'fade-slide-in': 'fadeSlideIn 0.5s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeSlideIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [],

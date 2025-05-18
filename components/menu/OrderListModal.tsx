@@ -102,6 +102,14 @@ export default function OrderListModal({ isOpen, onClose, tableId, restaurantId 
         ref={modalRef}
         className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in"
       >
+        <div className="bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 px-5 py-3 flex items-center border-b border-orange-200 animate-pulse">
+          <img src="/images/wooripay-icon.png" alt="우리페이" className="w-8 h-8 mr-4" />
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-bold text-orange-600">우리페이 결제 시 최대 5% 적립</span>
+            <span className="text-xs text-gray-600">QR 간편결제, 지금 리뷰 남기고 혜택까지 받아가세요!</span>
+          </div>
+        </div>
+
         <div className="flex justify-between items-center p-5 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">주문 내역</h2>
           <button onClick={onClose} aria-label="닫기" className="p-2 rounded-full bg-white shadow-md">
@@ -116,24 +124,28 @@ export default function OrderListModal({ isOpen, onClose, tableId, restaurantId 
             <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
           ) : (
             Object.entries(orders).map(([dateTime, orderList]) => (
-              <div key={dateTime} className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">{dateTime} 주문</h3>
+              <div key={dateTime} className="mb-5">
+                <h3 className="text-[15px] font-bold text-gray-800 mb-3 border-b border-gray-100 pb-1">{dateTime} 주문</h3>
                 <ul className="space-y-2">
                   {orderList.map((order, idx) => (
-                    <li key={idx} className="flex justify-between text-sm">
-                      <span
-                        className="text-primary font-medium cursor-pointer hover:underline"
-                        onClick={() => router.push(`/review/${order.id}`)}
-                      >
-                        {order.name}
-                      </span>
-                      <span className="text-gray-500 ml-1">x {order.quantity}</span>
-                      {order.options && Object.keys(order.options).length > 0 && (
-                        <span className="text-gray-500 text-xs ml-1">
-                          ({Object.entries(order.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
+                    <li key={idx} className="flex items-center text-[15px] gap-2 justify-between">
+                      <div className="flex-1">
+                        <span
+                          className="text-gray-800 font-medium cursor-pointer hover:underline truncate block"
+                          onClick={() => router.push(`/review/${order.id}`)}
+                        >
+                          {order.name}
                         </span>
-                      )}
-                      <span>{(order.price * order.quantity).toLocaleString()}원</span>
+                        {order.options && Object.keys(order.options).length > 0 && (
+                          <span className="text-gray-500 text-xs block mt-1">
+                            ({Object.entries(order.options).map(([k, v]) => `${k}: ${v}`).join(", ")})
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right min-w-[85px]">
+                        <div className="text-gray-600">x {order.quantity}</div>
+                        <div className="text-gray-900 font-semibold">{(order.price * order.quantity).toLocaleString()}원</div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -144,7 +156,7 @@ export default function OrderListModal({ isOpen, onClose, tableId, restaurantId 
 
         {Object.keys(orders).length > 0 && (
           <div className="p-4 border-t border-gray-200 bg-white">
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between mb-1">
               <span className="font-semibold text-gray-900">총 메뉴 수</span>
               <span className="font-bold text-primary">{totalItems}개</span>
             </div>

@@ -138,22 +138,33 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
           ) : (
             <ul className="space-y-4">
               {orders.map((order, idx) => (
-                <li key={idx} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                <li
+                  key={idx}
+                  className="flex items-center gap-8 p-4 rounded-lg border border-gray-200 bg-white shadow-md"
+                >
                   {order.image ? (
-                    <img src={order.image} alt={order.name} className="w-14 h-14 rounded-lg object-cover" />
+                    <img
+                      src={order.image}
+                      alt={order.name}
+                      className="w-16 h-16 rounded-lg object-cover border border-gray-300"
+                    />
                   ) : (
-                    <div className="w-14 h-14 rounded-lg bg-gray-200" />
+                    <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                      <span className="text-sm">No Image</span>
+                    </div>
                   )}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800">{order.name}</p>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-base font-semibold text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis font-[Pretendard]">
+                    {order.name}
+                    </p>
                   </div>
                   <button
                     onClick={() => handleReviewClick(order.id)}
                     disabled={order.reviewed}
                     className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow ${
                       order.reviewed
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-orange-400 text-white hover:bg-orange-500"
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-orange-500 text-white hover:bg-orange-600"
                     }`}
                   >
                     {order.reviewed ? "리뷰 완료" : "리뷰 달기"}

@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { format } from "date-fns"; // 날짜 형식 포맷
+
+const todayStr = format(new Date(), "MM/dd"); // 예: "05/13"
 
 export default function PaymentContent({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -23,13 +26,14 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
   });
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(180);
+  const [benefitOpen, setBenefitOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setPaymentError("결제 시간이 초과되었습니다. 장바구니로 돌아가 다시 시도해주세요.");
+          setPaymentError("결제 시간이 초과되었습니다. 장바구구니로 돌아가 다시 시도해주세요.");
           return 0;
         }
         return prev - 1;
@@ -113,6 +117,63 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
         </div>
       </div>
 
+{/* 혜택 요약 + 펼쳐지는 리스트 포함 */}
+<div className="mb-4 px-4 py-3 bg-white border border-[#FF6B35] rounded-xl shadow-sm transition-all">
+  <div className="flex justify-between items-center mb-2">
+    <span className="text-sm font-semibold text-[#1A1A1A]"> 오늘의 혜택</span>
+    <button
+  onClick={() => setBenefitOpen((prev) => !prev)}
+  className={`text-xs px-3 py-1 bg-[#FF6B35] text-white rounded-full shadow-sm hover:bg-[#e0521c] transition ${
+    !benefitOpen ? "animate-bounce" : ""
+  }`}
+>
+  원큐 클릭
+</button>
+  </div>
+  <p className="text-[12px] text-gray-500">5월 3주</p>
+
+{benefitOpen && (
+  <div className="mt-4 p-3 bg-[#FFF8E8] rounded-lg animate-fade-slide-in">
+    <div className="grid grid-cols-4 gap-2">
+      {[
+        { day: "일", date: "05/18", benefit: "500원 할인" },
+        { day: "월", date: "05/19", benefit: "우리페이 적립 2%" },
+        { day: "화", date: "05/20", benefit: "카카오페이 500P" },
+        { day: "수", date: "05/21", benefit: "신규가입 10% 할인" },
+        { day: "목", date: "05/22", benefit: "배달비 0원" },
+        { day: "금", date: "05/23", benefit: "쿠폰 증정" },
+        { day: "토", date: "05/24", benefit: "1000P 즉시지급" },
+      ].map(({ day, date, benefit }) => {
+const isToday = todayStr === date;
+return (
+  <div
+    key={date}
+    className={`relative p-3 text-xs rounded-xl border text-center flex flex-col items-center justify-center transition-all duration-300 ${
+      isToday
+        ? "bg-[#FFE6D5] border-[#FF8A4C] shadow-md ring-1 ring-[#FFB68E]"
+        : "bg-white border border-[#E0E0E0]"
+    }`}
+  >
+    {isToday && (
+      <div className="absolute top-1 right-1 text-green-600 text-sm font-semibold">✔</div>
+    )}
+    <p className="font-medium text-[#1A1A1A]">{day}</p>
+    <p className="text-[10px] text-gray-500">{date}</p>
+    <p className="mt-1 text-[11px] font-semibold text-[#FF6B35] text-center leading-snug">
+      {benefit}
+    </p>
+  </div>
+);
+      })}
+      <div className="p-3" />
+    </div>
+  </div>
+)}
+
+</div>
+
+
+
       {/* 주문 요약 */}
       <div className="bg-gray-50 p-4 rounded mb-6">
         <h2 className="font-semibold mb-2">주문 내역</h2>
@@ -137,6 +198,8 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
           <span>{totalAmount.toLocaleString()}원</span>
         </div>
       </div>
+
+
 
       {/* 결제 수단 선택 */}
       <div className="mb-6">
