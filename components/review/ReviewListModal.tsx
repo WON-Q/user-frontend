@@ -3,13 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { MenuItem } from "@/types/menu";
 
-interface OrderItem {
+interface ReviewItem {
   id: number;
   name: string;
-  quantity: number;
-  price: number;
-  options?: Record<string, any>;
+  image?: string;
   reviewed?: boolean;
 }
 
@@ -17,11 +16,13 @@ interface ReviewListModalProps {
   isOpen: boolean;
   onClose: () => void;
   tableId: string;
+  restaurantId: string;
+  menuItems: MenuItem[];
 }
 
-export default function ReviewListModal({ isOpen, onClose, tableId }: ReviewListModalProps) {
+export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId, menuItems }: ReviewListModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [orders, setOrders] = useState<ReviewItem[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -46,39 +47,56 @@ export default function ReviewListModal({ isOpen, onClose, tableId }: ReviewList
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (isOpen) {
-      const dummyOrders: OrderItem[] = [
-        {
-          id: 1,
-          name: "치즈버거 세트",
-          quantity: 1,
-          price: 8500,
-          options: { 사이드: "감자튀김", 음료: "콜라" },
-          reviewed: false,
-        },
-        {
-          id: 2,
-          name: "불고기 버거",
-          quantity: 1,
-          price: 7900,
-          options: { 사이드: "치즈볼" },
-          reviewed: true,
-        },
-        {
-          id: 3,
-          name: "스파게티",
-          quantity: 1,
-          price: 12000,
-          options: { 추가: "치즈" },
-          reviewed: false,
-        },
-      ];
-      setOrders(dummyOrders);
-    }
-  }, [isOpen]);
+    if (isOpen && restaurantId && tableId) {
+      const orderKey = `order_${restaurantId}_${tableId}`;
+      const raw = localStorage.getItem(orderKey);
 
-  const handleReviewClick = (orderId: number) => {
-    router.push(`/restaurant/${orderId}/review/${orderId}`);
+      if (!raw) return;
+
+      const fetchMenus = async () => {
+        try {
+          const orderCodes: string[] = JSON.parse(raw);
+
+          const allMenus = await Promise.all(
+            orderCodes.map(async (code) => {
+              const res = await fetch(`http://localhost:8080/api/v1/orders/code/${code}`);
+              const json = await res.json();
+              const order = json.data;
+
+              return order.menus.map((menu: any) => ({
+                id: menu.menuId,
+                name: menu.menuName,
+                reviewed: false,
+              }));
+            })
+          );
+
+          const flatMenus = allMenus.flat();
+
+          // ✅ menuId 기준으로 중복 제거 및 이미지 매칭
+          const uniqueMenusMap = new Map<number, ReviewItem>();
+          flatMenus.forEach((menu) => {
+            if (!uniqueMenusMap.has(menu.id)) {
+              const matchedImage = menuItems.find((item) => item.id === menu.id)?.image;
+              uniqueMenusMap.set(menu.id, {
+                ...menu,
+                image: matchedImage || "/placeholder.png",
+              });
+            }
+          });
+
+          setOrders(Array.from(uniqueMenusMap.values()));
+        } catch (err) {
+          console.error("📛 리뷰 메뉴 불러오기 실패:", err);
+        }
+      };
+
+      fetchMenus();
+    }
+  }, [isOpen, restaurantId, tableId, menuItems]);
+
+  const handleReviewClick = (menuId: number) => {
+    router.push(`/review/${menuId}`);
   };
 
   if (!isOpen || !mounted) return null;
@@ -89,10 +107,9 @@ export default function ReviewListModal({ isOpen, onClose, tableId }: ReviewList
         ref={modalRef}
         className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in"
       >
-        {/* Reward Banner */}
         <div className="bg-[var(--color-primary-light)] px-4 py-3 flex items-center justify-between border-b border-[var(--color-primary)]">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🎁</span>
+            <span className="text-xl animate-bounce">🎁</span>
             <span className="text-sm text-gray-800 font-medium">
               지금 리뷰 작성 시 <span className="text-[var(--color-primary)] font-bold">100P 포인트</span> 지급!
             </span>
@@ -102,7 +119,6 @@ export default function ReviewListModal({ isOpen, onClose, tableId }: ReviewList
           </span>
         </div>
 
-        {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">리뷰 작성</h2>
           <button onClick={onClose} aria-label="닫기" className="p-2 rounded-full bg-white shadow-md">
@@ -116,35 +132,29 @@ export default function ReviewListModal({ isOpen, onClose, tableId }: ReviewList
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-5">
           {orders.length === 0 ? (
-            <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
+            <p className="text-sm text-gray-500">작성할 리뷰가 없습니다.</p>
           ) : (
             <ul className="space-y-4">
               {orders.map((order, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center p-3 rounded-lg bg-orange-50 border border-orange-100"
-                >
-                  <div className="flex flex-col text-sm">
-                    <span className="font-semibold text-gray-900">{order.name}</span>
-                    {order.options && Object.keys(order.options).length > 0 && (
-                      <span className="text-[13px] text-orange-600 mt-1">
-                        {Object.entries(order.options)
-                          .map(([k, v]) => `${k}: ${v}`)
-                          .join(", ")}
-                      </span>
-                    )}
+                <li key={idx} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                  {order.image ? (
+                    <img src={order.image} alt={order.name} className="w-14 h-14 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-gray-200" />
+                  )}
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">{order.name}</p>
                   </div>
                   <button
                     onClick={() => handleReviewClick(order.id)}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold transition-colors duration-200 shadow ${
+                    disabled={order.reviewed}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow ${
                       order.reviewed
                         ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                         : "bg-orange-400 text-white hover:bg-orange-500"
                     }`}
-                    disabled={order.reviewed}
                   >
                     {order.reviewed ? "리뷰 완료" : "리뷰 달기"}
                   </button>

@@ -142,12 +142,15 @@ export default function MenuPage() {
         {storeName}
       </NavBar>
 
-      {/* Review Modal */}
-      <ReviewListModal
+          <ReviewListModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         tableId={tableId || ""}
+        restaurantId={restaurantId || ""}
+        menuItems={menuItems} // ✅ 메뉴 이미지 정보 전달
       />
+
+
 
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -170,13 +173,13 @@ export default function MenuPage() {
             onClick={() => setIsReviewModalOpen(true)}
             className="flex items-center justify-center bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 ease-out transform hover:scale-[1.02] animate-fade-slide w-full"
           >
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center ">
               <img
                 src="/images/review-icon.png"
                 alt="리뷰"
-                className="w-10 h-10 mr-3"
+                className="w-10 h-10 mr-3 "
               />
-              <div className="flex flex-col items-start justify-center">
+              <div className="flex flex-col items-start justify-center ">
                 <span className="text-sm font-semibold text-gray-900">
                   리뷰 작성하고 포인트 받기
                 </span>
