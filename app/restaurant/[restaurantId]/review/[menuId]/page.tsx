@@ -1,16 +1,19 @@
 "use client";
 
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import NavBar from "@/components/navbar/NavBar";
 import ReviewStars from "@/components/review/ReviewStars";
 
 export default function ReviewPage() {
-  const restaurantId = "1";
-  const tableId = "2";
-  const menuId = "1";
-  const menuName = "화덕에구운 즉발신선생 ";
-  const menuDescription = "[베스트 메뉴] 스테이크 피자";
-  const menuImage = "/placeholder.svg?height=80&width=80";
+  const params = useParams();
+  const searchParams = useSearchParams();
+
+  const restaurantId = params.restaurantId as string;
+  const menuId = params.menuId as string;
+  const tableId = searchParams.get("tableId") ?? "1";
+  const menuName = decodeURIComponent(searchParams.get("name") ?? "메뉴명");
+  const menuImage = decodeURIComponent(searchParams.get("image") ?? "/placeholder.svg");
 
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -25,6 +28,7 @@ export default function ReviewPage() {
   const handleSubmitReview = () => {
     console.log("Review Submitted:", {
       restaurantId,
+      tableId,
       menuId,
       rating,
       reviewText,
@@ -50,7 +54,7 @@ export default function ReviewPage() {
             />
             <div>
               <h2 className="font-semibold text-lg">{menuName}</h2>
-              <p className="text-sm text-gray-500">{menuDescription}</p>
+              <p className="text-sm text-gray-500">메뉴에 대한 리뷰를 남겨주세요</p>
             </div>
           </div>
         </div>
@@ -68,29 +72,19 @@ export default function ReviewPage() {
             size="lg"
           />
         </div>
-         {rating > 0 && (
-  <div className="text-center mb-8">
-    <div className="relative inline-block bg-[var(--color-primary-light)] rounded-full px-6 py-3 mx-auto">
-      <span className="text-[var(--color-primary)] font-medium text-lg">
-        {rating === 1 && "별로예요"}
-        {rating === 2 && "그저그래요"}
-        {rating === 3 && "괜찮아요"}
-        {rating === 4 && "좋아요"}
-        {rating === 5 && "맛있어요"}
-      </span>
 
-      {/* 이모지 오른쪽 위 표시 */}
-      <div className="absolute -top-3 -right-3 text-2xl">
-        {rating === 1 && "😞"}
-        {rating === 2 && "😐"}
-        {rating === 3 && "🙂"}
-        {rating === 4 && "😋"}
-        {rating === 5 && "🤤"}
-      </div>
-    </div>
-  </div>
-)}
-
+        {rating > 0 && (
+          <div className="text-center mb-8">
+            <div className="relative inline-block bg-[var(--color-primary-light)] rounded-full px-6 py-3 mx-auto">
+              <span className="text-[var(--color-primary)] font-medium text-lg">
+                {["", "별로예요", "그저그래요", "괜찮아요", "좋아요", "맛있어요"][rating]}
+              </span>
+              <div className="absolute -top-3 -right-3 text-2xl">
+                {["", "😞", "😐", "🙂", "😋", "🤤"][rating]}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mb-4">
           <div className="relative">

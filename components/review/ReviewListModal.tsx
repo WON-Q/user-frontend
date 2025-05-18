@@ -95,9 +95,15 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
     }
   }, [isOpen, restaurantId, tableId, menuItems]);
 
-  const handleReviewClick = (menuId: number) => {
-    router.push(`/review/${menuId}`);
-  };
+const handleReviewClick = (menu: ReviewItem) => {
+  const encodedName = encodeURIComponent(menu.name);
+  const encodedImage = encodeURIComponent(menu.image ?? "");
+
+  router.push(
+    `/restaurant/${restaurantId}/review/${menu.id}?tableId=${tableId}&name=${encodedName}&image=${encodedImage}`
+  );
+};
+
 
   if (!isOpen || !mounted) return null;
 
@@ -158,17 +164,17 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
                     {order.name}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleReviewClick(order.id)}
-                    disabled={order.reviewed}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow ${
-                      order.reviewed
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-orange-500 text-white hover:bg-orange-600"
-                    }`}
-                  >
-                    {order.reviewed ? "리뷰 완료" : "리뷰 달기"}
-                  </button>
+               <button
+  onClick={() => handleReviewClick(order)}
+  disabled={order.reviewed}
+  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow ${
+    order.reviewed
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-orange-500 text-white hover:bg-orange-600"
+  }`}
+>
+  {order.reviewed ? "리뷰 완료" : "리뷰 달기"}
+</button>
                 </li>
               ))}
             </ul>
