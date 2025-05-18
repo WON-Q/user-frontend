@@ -78,15 +78,15 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
       const payData = await payRes.json();
       if (!payRes.ok) throw new Error(payData.message || "결제 요청 실패");
 
-      // ✅ 결제 성공 시 리다이렉트 URL로 이동
+      //  결제 성공 시 리다이렉트 URL로 이동
       window.location.href = payData.redirectUrl; // 예: "https://wooricard.com/..."
       */
 
-      // ✅ 결제 중 페이지로 전환
-      router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&processing=true`);
+      // PG사로 결제 응답을 받으면면
+      router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}&processing=true`);
 
-      // ✅ 장바구니 클리어
-      clearCart();
+      //  장바구니 클리어
+     
     } catch (error) {
       console.error(error);
       setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -94,19 +94,6 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
     }
   };
 
-  if (items.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-6 text-center">
-        <p>장바구니가 비어 있습니다.</p>
-        <Link
-          href={`/restaurant/${restaurantId}/table/${tableId}/cart`}
-          className="text-[#FF6B35] mt-4 inline-block"
-        >
-          홈으로 돌아가기
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">

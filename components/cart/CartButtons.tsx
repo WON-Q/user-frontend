@@ -52,8 +52,25 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
 
       console.log("✅ 주문 준비 완료:", result.data.orderCode);
 
-      // 다음 페이지 이동 예시
-       router.push(`/payment/${result.data.orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
+      const orderCode = result.data.orderCode;
+
+      // ✅ 현재 주문 저장
+      localStorage.setItem(
+        `nowOrder_${restaurantId}_${tableId}`,
+        JSON.stringify({
+          orderCode,
+          totalAmount: result.data.totalAmount,
+        })
+      );
+
+      // ✅ 과거 주문 리스트에 추가
+      const historyKey = `order_${restaurantId}_${tableId}`;
+      const previous = JSON.parse(localStorage.getItem(historyKey) || "[]");
+      const updated = Array.from(new Set([...previous, orderCode]));
+      localStorage.setItem(historyKey, JSON.stringify(updated));
+
+      // 다음 페이지 이동 예시(callbackurl)
+      router.push(`/payment/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
     } catch (err) {
       console.error("🚨 주문 준비 중 오류:", err);
       alert("주문 처리에 실패했습니다.");

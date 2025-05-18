@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
+
 
 export default function PaymentProcessingPage() {
   const searchParams = useSearchParams();
@@ -11,37 +11,24 @@ export default function PaymentProcessingPage() {
   const orderId = searchParams.get("orderId");
   const restaurantId = searchParams.get("restaurantId");
   const processing = searchParams.get("processing");
-
+  const tableId = searchParams.get("tableId"); 
   console.log("orderId:", orderId); // Log the orderId
   console.log("restaurantId:", restaurantId); // Log the restaurantId
   console.log("processing:", processing); // Log the processing flag
 
   useEffect(() => {
-    if (!orderId || !restaurantId || !processing) {
+    if (!orderId || !restaurantId || !processing || !tableId) {
       console.error("Missing required query parameters.");
       return;
     }
+    // 실제로는 api서버에 처리결과 기다리야함함
+    // 임시 5초 대기 후 성공 페이지로 이동
+    const timer = setTimeout(() => {
+      router.push(`/payment/complete?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}`);
+    }, 5000);
 
-    const checkPaymentStatus = async () => {
-      try {
-        // Simulate API call to check payment status
-        const response = await fetch(`http://localhost:8080/api/v1/pg/status?orderId=${orderId}`);
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "결제 상태 확인 실패");
-
-        if (data.status === "success") {
-          router.push(`/payment/complete?orderId=${orderId}&restaurantId=${restaurantId}`);
-        } else {
-          alert("결제가 실패했습니다. 다시 시도해주세요.");
-        }
-      } catch (error) {
-        console.error("결제 상태 확인 중 오류:", error);
-        alert("결제 상태 확인 중 오류가 발생했습니다.");
-      }
-    };
-
-    checkPaymentStatus();
-  }, [orderId, restaurantId, processing, router]);
+    return () => clearTimeout(timer); // cleanup
+  }, [orderId, restaurantId, tableId, processing, router]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6">

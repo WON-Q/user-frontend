@@ -80,13 +80,14 @@ export default function NavBar({
       </div>
 
       {/* 주문내역 모달 */}
-      {tableId && showOrderListModal && (
-        <OrderListModal
-          isOpen={isOrderModalOpen}
-          onClose={() => setOrderModalOpen(false)}
-          tableId={tableId}
-        />
-      )}
+      {tableId && showOrderListModal && restaurantId && (
+    <OrderListModal
+      isOpen={isOrderModalOpen}
+      onClose={() => setOrderModalOpen(false)}
+      tableId={tableId}
+      restaurantId={restaurantId} // ✅ 여기에 추가
+    />
+  )}
     </div>
   );
 }

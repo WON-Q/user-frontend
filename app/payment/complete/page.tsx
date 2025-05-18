@@ -1,14 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { CheckCircle2, ArrowRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function PaymentCompletePage() {
   const searchParams = useSearchParams();
-  const restaurantId = searchParams.get("restaurantId") || "defaultRestaurantId"; // Fallback value
-  const tableId = searchParams.get("tableId") || "defaultTableId"; // Fallback value
+
+  const [orderId, setOrderId] = useState("UNKNOWN-ORDER");
+  const [restaurantId, setRestaurantId] = useState("1");
+  const [tableId, setTableId] = useState("1");
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [confirmedOrderCode, setConfirmedOrderCode] = useState(""); // ✅ 추가
+
+  useEffect(() => {
+    const _orderId = searchParams.get("orderId");
+    const _restaurantId = searchParams.get("restaurantId");
+    const _tableId = searchParams.get("tableId");
+
+    if (!_orderId || !_restaurantId || !_tableId) return;
+
+    setOrderId(_orderId);
+    setRestaurantId(_restaurantId);
+    setTableId(_tableId);
+
+    const key = `nowOrder_${_restaurantId}_${_tableId}`;
+    const raw = localStorage.getItem(key);
+
+    console.log("🧩 key:", key);
+    console.log("🧩 orderId:", _orderId);
+    console.log("🧩 raw:", raw);
+
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        setTotalAmount(parsed.totalAmount || 0);
+        setConfirmedOrderCode(parsed.orderCode || ""); // ✅ orderCode도 저장
+        localStorage.removeItem(`cart_${_restaurantId}_${_tableId}`);
+      } catch (e) {
+        console.error("🚨 로컬스토리지 파싱 오류:", e);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8F8F8] p-4">
@@ -23,24 +57,15 @@ export default function PaymentCompletePage() {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span className="text-[#767676]">주문번호</span>
-              <span className="font-medium text-[#1A1A1A]">BAEMIN-12345</span>
+              <span className="font-medium text-[#1A1A1A]">
+                {confirmedOrderCode || orderId} {/* ✅ 우선순위: 로컬스토리지 값 */}
+              </span>
             </div>
-
             <div className="flex justify-between">
               <span className="text-[#767676]">결제 금액</span>
-              <span className="font-medium text-[#1A1A1A]">₩18,500</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-[#767676]">결제 방법</span>
-              <span className="font-medium text-[#1A1A1A]">신용카드</span>
-            </div>
-
-            <div className="border-t border-[#E0E0E0] my-2"></div>
-
-            <div className="flex justify-between">
-              <span className="text-[#767676]">준비 예상 시간</span>
-              <span className="font-medium text-[#FF6B35]">35~45분</span>
+              <span className="font-medium text-[#1A1A1A]">
+                ₩{totalAmount.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>

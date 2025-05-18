@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation"; // ✅ Import useRouter
+import { useRouter } from "next/navigation";
 
 interface OrderItem {
   id: number;
@@ -16,19 +16,19 @@ interface OrderListModalProps {
   isOpen: boolean;
   onClose: () => void;
   tableId: string;
+  restaurantId: string;
 }
 
-export default function OrderListModal({ isOpen, onClose, tableId }: OrderListModalProps) {
+export default function OrderListModal({ isOpen, onClose, tableId, restaurantId }: OrderListModalProps) {
   const [mounted, setMounted] = useState(false);
   const [orders, setOrders] = useState<Record<string, OrderItem[]>>({});
   const modalRef = useRef<HTMLDivElement>(null);
-  const router = useRouter(); // ✅ Initialize useRouter
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 바깥 클릭 시 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -45,45 +45,51 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
     };
   }, [isOpen, onClose]);
 
-  // 주문 데이터 불러오기
   useEffect(() => {
-    if (isOpen) {
-      const matchedKeys = Object.keys(localStorage).filter((key) =>
-        key.endsWith(`_t${tableId}`)
-      );
+    if (isOpen && restaurantId && tableId) {
+      const orderKey = `order_${restaurantId}_${tableId}`;
+      const raw = localStorage.getItem(orderKey);
 
-      const groupedOrders: Record<string, OrderItem[]> = {};
+      if (!raw) return;
 
-      matchedKeys.forEach((key) => {
-        const storedOrders = localStorage.getItem(key);
-        if (storedOrders) {
-          try {
-            const parsedOrders: OrderItem[] = JSON.parse(storedOrders);
+      try {
+        const orderCodes: string[] = JSON.parse(raw);
+        const grouped: Record<string, OrderItem[]> = {};
 
-            // 키에서 날짜와 시간(YYYY-MM-DD HH:mm) 추출
-            const dateTimeMatch = key.match(/(\d{6})T(\d{4})_t/);
-            const dateLabel = dateTimeMatch
-              ? `20${dateTimeMatch[1].slice(0, 2)}-${dateTimeMatch[1].slice(2, 4)}-${dateTimeMatch[1].slice(4, 6)}`
-              : "날짜 없음";
-            const timeLabel = dateTimeMatch
-              ? `${dateTimeMatch[2].slice(0, 2)}:${dateTimeMatch[2].slice(2, 4)}`
-              : "시간 없음";
-            const dateTimeLabel = `${dateLabel} ${timeLabel}`;
+        Promise.all(
+          orderCodes.map(async (code) => {
+            const res = await fetch(`http://localhost:8080/api/v1/orders/code/${code}`);
+            const json = await res.json();
+            const order = json.data;
 
-            if (!groupedOrders[dateTimeLabel]) {
-              groupedOrders[dateTimeLabel] = [];
-            }
-            groupedOrders[dateTimeLabel].push(...parsedOrders);
+            const date = new Date(order.createdAt);
+            const dateLabel = date.toLocaleDateString("ko-KR");
+            const timeLabel = date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+            const label = `${dateLabel} ${timeLabel}`;
 
-          } catch (e) {
-            console.error("로컬스토리지 파싱 오류:", e);
-          }
-        }
-      });
+            if (!grouped[label]) grouped[label] = [];
 
-      setOrders(groupedOrders);
+            order.menus.forEach((menu: any) => {
+              grouped[label].push({
+                id: menu.menuId,
+                name: menu.menuName,
+                quantity: menu.quantity,
+                price: menu.unitPrice,
+                options: (menu.options || []).reduce((acc: any, opt: any) => {
+                  acc[opt.optionName] = `${opt.optionPrice.toLocaleString()}원`;
+                  return acc;
+                }, {}),
+              });
+            });
+          })
+        ).then(() => {
+          setOrders(grouped);
+        });
+      } catch (err) {
+        console.error("주문 정보 파싱 실패:", err);
+      }
     }
-  }, [isOpen, tableId]);
+  }, [isOpen, restaurantId, tableId]);
 
   const totalItems = Object.values(orders).flat().reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = Object.values(orders).flat().reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -100,7 +106,7 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
           <h2 className="text-lg font-bold text-gray-900">주문 내역</h2>
           <button onClick={onClose} aria-label="닫기" className="p-2 rounded-full bg-white shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </button>
         </div>
@@ -117,7 +123,7 @@ export default function OrderListModal({ isOpen, onClose, tableId }: OrderListMo
                     <li key={idx} className="flex justify-between text-sm">
                       <span
                         className="text-primary font-medium cursor-pointer hover:underline"
-                        onClick={() => router.push(`/review/${order.id}`)} // ✅ Make menu name clickable
+                        onClick={() => router.push(`/review/${order.id}`)}
                       >
                         {order.name}
                       </span>
