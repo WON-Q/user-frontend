@@ -9,6 +9,7 @@ import { MenuItem, MenuCategory } from "@/types/menu";
 import { fetchMenusByMerchant, fetchMerchantOverview, MenuResponse } from "./router"; // Adjust the path to your router.js
 import Link from 'next/link'; // Ensure Link is imported correctly
 import ReviewListModal from "@/components/review/ReviewListModal";
+import GameModal from "@/components/menu/GameModal"; // Import GameModal
 
 export default function MenuPage() {
   const pathname = usePathname();
@@ -28,6 +29,7 @@ export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isGameModalOpen, setIsGameModalOpen] = useState(false); // Add state for GameModal
 
   useEffect(() => {
     const parts = pathname.split("/");
@@ -168,18 +170,19 @@ export default function MenuPage() {
       )}
 
       <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 shadow-sm">
-        <div className="px-4 pt-3">
+        <div className="relative mt-3 px-4">
           <div
             onClick={() => setIsReviewModalOpen(true)}
             className="flex items-center justify-center bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 ease-out transform hover:scale-[1.02] animate-fade-slide w-full"
           >
-            <div className="flex items-center justify-center ">
+            {/* 리뷰 배너 내용 */}
+            <div className="flex items-center justify-center">
               <img
                 src="/images/review-icon.png"
                 alt="리뷰"
-                className="w-10 h-10 mr-3 "
+                className="w-10 h-10 mr-3"
               />
-              <div className="flex flex-col items-start justify-center ">
+              <div className="flex flex-col items-start justify-center">
                 <span className="text-sm font-semibold text-gray-900">
                   리뷰 작성하고 포인트 받기
                 </span>
@@ -189,6 +192,13 @@ export default function MenuPage() {
               </div>
             </div>
           </div>
+         <button
+          onClick={() => setIsGameModalOpen(true)}
+          className="absolute right-8 top-1/2 -translate-y-1/2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:scale-105 transition-transform"
+          aria-label="게임하기"
+        >
+          🎮
+        </button>
         </div>
         <div
           ref={categoryScrollRef}
@@ -272,6 +282,8 @@ export default function MenuPage() {
         restaurantId={restaurantId}
         tableId={tableId}
       />
+
+      <GameModal isOpen={isGameModalOpen} onClose={() => setIsGameModalOpen(false)} /> {/* Add GameModal */}
 
       <div className="fixed bottom-5 inset-x-4 flex justify-center z-20">
         <Link

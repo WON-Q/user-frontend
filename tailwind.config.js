@@ -43,8 +43,11 @@ module.exports = {
         card: "12px",
       },
       animation: {
-        'fade-in': 'fadeIn 0.6s ease-out',
+        'fade-in': 'fadeIn 0.6s ease-out',         // ✅ 기존 유지
         'fade-slide-in': 'fadeSlideIn 0.5s ease-out',
+        'bubble-fade': 'bubbleFade 0.4s ease-out', // 🔥 추가
+        'float-cloud': 'floatCloud 2.5s ease-in-out infinite', // ✅ 부드러운 구름 효과
+        'fade-in-slow': 'fadeInSlow 0.5s ease-out forwards', // ✅ 느린 페이드 인
       },
       keyframes: {
         fadeIn: {
@@ -54,6 +57,34 @@ module.exports = {
         fadeSlideIn: {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        bubbleFade: { // 🔥 추가
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-4px) scale(0.95)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0) scale(1)',
+          },
+        },
+        floatCloud: { // ✅ 위아래로 부드럽게 떠다니는 효과
+          '0%, 100%': {
+            transform: 'translateY(-10px) scale(1.02)',
+          },
+          '50%': {
+            transform: 'translateY(10px) scale(0.98)',
+          },
+        },
+        fadeInSlow: { // ✅ 느린 페이드 인 효과
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.95) translateY(10px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1) translateY(0)',
+          },
         },
       },
     },

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ...existing code... */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -7,3 +11,13 @@
   scrollbar-width: none; /* Firefox */
 }
 /* ...existing code... */
+/* globals.css */
+
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
