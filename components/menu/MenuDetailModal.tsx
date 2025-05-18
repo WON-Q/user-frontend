@@ -24,6 +24,7 @@ export default function MenuDetailModal({
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
   const [totalPrice, setTotalPrice] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
+  const cartButtonRef = useRef<HTMLButtonElement>(null); // Ref for the cart button
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -82,6 +83,50 @@ export default function MenuDetailModal({
     }));
   };
 
+  const flyToCart = () => {
+    const image = document.querySelector(".menu-preview-image") as HTMLElement;
+    const cartButton = cartButtonRef.current;
+
+    if (!image || !cartButton) return;
+
+    const clone = image.cloneNode(true) as HTMLElement;
+    const imageRect = image.getBoundingClientRect();
+    const cartRect = cartButton.getBoundingClientRect();
+
+    clone.style.position = "fixed";
+    clone.style.left = `${imageRect.left}px`;
+    clone.style.top = `${imageRect.top}px`;
+    clone.style.width = `${imageRect.width}px`;
+    clone.style.height = `${imageRect.height}px`;
+    clone.style.zIndex = "1000";
+    clone.style.transition = `
+      transform 0.8s ease-in-out,
+      opacity 0.8s ease-in-out,
+      left 0.8s ease-in-out,
+      top 0.8s ease-in-out`;
+    clone.style.pointerEvents = "none";
+    clone.style.borderRadius = "12px";
+    clone.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
+    clone.style.background = "#fff";
+    clone.style.objectFit = "cover";
+
+    document.body.appendChild(clone);
+
+    requestAnimationFrame(() => {
+      const targetLeft = cartRect.left + cartRect.width / 2 - imageRect.width / 2 + window.scrollX;
+      const targetTop = cartRect.top + cartRect.height / 2 - imageRect.height / 2 + window.scrollY;
+
+      clone.style.left = `${targetLeft}px`;
+      clone.style.top = `${targetTop}px`;
+      clone.style.opacity = "0";
+      clone.style.transform = "scale(0.2) rotate(720deg)";
+    });
+
+    setTimeout(() => {
+      document.body.removeChild(clone);
+    }, 800);
+  };
+
   const handleAddToCart = () => {
     if (menu) {
       const optionsForCart: { [key: string]: string } = {};
@@ -95,6 +140,7 @@ export default function MenuDetailModal({
       });
 
       addItem(menu, quantity, optionsForCart, optionIdsForCart);
+      flyToCart(); // Trigger the animation
 
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
@@ -128,11 +174,11 @@ export default function MenuDetailModal({
         {/* 상단 이미지 */}
         <div className="relative w-full h-[220px] sm:h-[300px]">
           <Image
-            src={imageUrl}  // menu.image가 없으면 기본 이미지 사용
+            src={imageUrl}
             alt={menu.name}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
+            className="object-cover menu-preview-image" // Add class for animation
             priority
           />
           <button
@@ -271,6 +317,7 @@ export default function MenuDetailModal({
             </span>
           </div>
           <button
+            ref={cartButtonRef} // Add ref for the cart button
             onClick={handleAddToCart}
             className="w-full py-4 bg-[var(--color-primary)] text-white rounded-lg font-semibold shadow-md hover:bg-secondary transition-colors active:scale-98"
           >
@@ -281,4 +328,3 @@ export default function MenuDetailModal({
     </div>
   );
 }
-  

@@ -53,7 +53,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
       console.log("✅ 주문 준비 완료:", result.data.orderCode);
 
       // 다음 페이지 이동 예시
-      // router.push(`/payment/${result.data.orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
+       router.push(`/payment/${result.data.orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
     } catch (err) {
       console.error("🚨 주문 준비 중 오류:", err);
       alert("주문 처리에 실패했습니다.");
