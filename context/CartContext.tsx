@@ -27,6 +27,8 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalAmount: number;
+  cartItemCount: number;
+  updateCartCount: (restaurantId: string, tableId: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -40,6 +42,7 @@ interface CartProviderProps {
 export function CartProvider({ children, restaurantId, tableId }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [initialized, setInitialized] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   useEffect(() => {
     const cartKey = `cart_${restaurantId}_${tableId}`;
@@ -134,6 +137,11 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
     setItems([]);
   };
 
+  const updateCartCount = (restaurantId: string, tableId: string) => {
+    const cart = JSON.parse(localStorage.getItem(`cart_${restaurantId}_${tableId}`) || "[]");
+    setCartItemCount(cart.length);
+  };
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
@@ -146,7 +154,9 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
         updateQuantity,
         clearCart,
         totalItems,
-        totalAmount
+        totalAmount,
+        cartItemCount,
+        updateCartCount
       }}
     >
       {children}

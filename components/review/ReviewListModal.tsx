@@ -66,14 +66,17 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
               return order.menus.map((menu: any) => ({
                 id: menu.menuId,
                 name: menu.menuName,
-                reviewed: false,
+                reviewed: false, // 기본은 false
               }));
             })
           );
 
           const flatMenus = allMenus.flat();
 
-          // ✅ menuId 기준으로 중복 제거 및 이미지 매칭
+          // 📌 1️⃣ 리뷰 완료 상태 불러오기 (localStorage)
+          const reviewedKey = `reviewed_${restaurantId}_${tableId}`;
+          const reviewedData = JSON.parse(localStorage.getItem(reviewedKey) || "[]") as number[];
+
           const uniqueMenusMap = new Map<number, ReviewItem>();
           flatMenus.forEach((menu) => {
             if (!uniqueMenusMap.has(menu.id)) {
@@ -81,6 +84,7 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
               uniqueMenusMap.set(menu.id, {
                 ...menu,
                 image: matchedImage || "/placeholder.png",
+                reviewed: reviewedData.includes(menu.id), // ✅ mock 상태 적용
               });
             }
           });
@@ -96,6 +100,9 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
   }, [isOpen, restaurantId, tableId, menuItems]);
 
 const handleReviewClick = (menu: ReviewItem) => {
+ 
+
+  // 2. 리뷰 작성 페이지로 이동
   const encodedName = encodeURIComponent(menu.name);
   const encodedImage = encodeURIComponent(menu.image ?? "");
 
@@ -167,13 +174,31 @@ const handleReviewClick = (menu: ReviewItem) => {
                <button
   onClick={() => handleReviewClick(order)}
   disabled={order.reviewed}
-  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow ${
+  className={`w-[100px] px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow flex items-center justify-center gap-1 ${
     order.reviewed
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      ? "bg-orange-100 text-orange-700 cursor-default"
       : "bg-orange-500 text-white hover:bg-orange-600"
   }`}
 >
-  {order.reviewed ? "리뷰 완료" : "리뷰 달기"}
+  {order.reviewed ? (
+    <>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-orange-600"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+      <path
+          fillRule="evenodd"
+          d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
+          clipRule="evenodd"
+        />
+      </svg>
+      리뷰 완료
+    </>
+  ) : (
+    "리뷰 달기"
+  )}
 </button>
                 </li>
               ))}

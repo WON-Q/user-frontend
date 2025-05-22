@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation"; // Added useRouter
 import { useState } from "react";
 import NavBar from "@/components/navbar/NavBar";
 import ReviewStars from "@/components/review/ReviewStars";
@@ -8,6 +8,7 @@ import ReviewStars from "@/components/review/ReviewStars";
 export default function ReviewPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter(); // Initialize router
 
   const restaurantId = params.restaurantId as string;
   const menuId = params.menuId as string;
@@ -33,7 +34,19 @@ export default function ReviewPage() {
       rating,
       reviewText,
     });
+
+    // ✅ 리뷰 완료 상태 저장
+    const reviewedKey = `reviewed_${restaurantId}_${tableId}`;
+    const reviewedList = JSON.parse(localStorage.getItem(reviewedKey) || "[]") as number[];
+
+    const numericMenuId = parseInt(menuId, 10);
+    if (!reviewedList.includes(numericMenuId)) {
+      reviewedList.push(numericMenuId);
+      localStorage.setItem(reviewedKey, JSON.stringify(reviewedList));
+    }
+
     alert("리뷰가 성공적으로 제출되었습니다!");
+    router.push(`/restaurant/${restaurantId}/table/${tableId}/menu`); // Redirect to menu main page
   };
 
   return (

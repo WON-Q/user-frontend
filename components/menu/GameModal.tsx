@@ -8,13 +8,13 @@ interface GameModalProps {
 }
 
 const prizes = [
-  { label: "꽝", image: "/images/wooripay-icon.png" },
-  { label: "사이다 당첨", image: "/images/cookie.png" },
-  { label: "콜라 당첨", image: "/images/wooripay-icon.png" },
-  { label: "쿠폰 500원", image: "/images/cookie.png" },
-  { label: "꽝", image: "/images/wooripay-icon.png" },
-  { label: "쿠폰 1000원", image: "/images/cookie.png" },
-  { label: "음료 당첨", image: "/images/wooripay-icon.png" },
+  { label: "꽝", image: "/images/cookie.png" },
+  { label: "500 포인트 적립", image: "/images/cookie.png" },
+  { label: "500 포안두 적립", image: "/images/cookie.png" },
+  { label: "꽝", image: "/images/cookie.png" },
+  { label: "꽝", image: "/images/cookie.png" },
+  { label: "꽝", image: "/images/cookie.png" },
+  { label: "500 포인트 적립립", image: "/images/cookie.png" },
   { label: "꽝", image: "/images/cookie.png" },
 ];
 

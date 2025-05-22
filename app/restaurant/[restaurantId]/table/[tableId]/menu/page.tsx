@@ -10,6 +10,7 @@ import { fetchMenusByMerchant, fetchMerchantOverview, MenuResponse } from "./rou
 import Link from 'next/link'; // Ensure Link is imported correctly
 import ReviewListModal from "@/components/review/ReviewListModal";
 import GameModal from "@/components/menu/GameModal"; // Import GameModal
+import { useCart } from "@/context/CartContext"; // Import useCart
 
 export default function MenuPage() {
   const pathname = usePathname();
@@ -20,9 +21,8 @@ export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
  const [storeName, setStoreName] = useState<string | null>(null);
-  const [storeImgUrl, setStoreImgUrl] = useState<string | null>(null); // 💡 Add state for store image URL
+  const [storeImgUrl, setStoreImgUrl] = useState<string | null>(null); // Add state for store image URL
 
-  const [cartItemCount, setCartItemCount] = useState(0);  // 카트 항목 개수
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [loading, setIsLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -30,6 +30,7 @@ export default function MenuPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false); // Add state for GameModal
+  const { cartItemCount, updateCartCount } = useCart(); // Access cart context
 
   useEffect(() => {
     const parts = pathname.split("/");
@@ -83,7 +84,7 @@ export default function MenuPage() {
 
         // Update store name and image
         setStoreName(merchant.merchantName);
-        setStoreImgUrl(merchant.merchantImgUrl); // 💡 Set store image URL
+        setStoreImgUrl(merchant.merchantImgUrl); // Set store image URL
       } catch (e) {
         console.error("가맹점/메뉴 데이터 로딩 실패", e);
       } finally {
@@ -98,14 +99,12 @@ export default function MenuPage() {
     const now = Date.now();
     if (lastActivity && now - parseInt(lastActivity) > 30 * 60 * 1000) {
       localStorage.removeItem(`cart_${restaurantId}_${tableId}`);
-      setCartItemCount(0);
     }
 
-    const cart = JSON.parse(localStorage.getItem(`cart_${restaurantId}_${tableId}`) || "[]");
-    setCartItemCount(cart.length);
+    updateCartCount(restaurantId, tableId); // Update cart count on load
 
     localStorage.setItem(`lastActivity_${tableId}`, now.toString());
-  }, [restaurantId, tableId]);
+  }, [restaurantId, tableId, updateCartCount]);
 
   if (!restaurantId || !tableId) return null;
 
@@ -139,7 +138,7 @@ export default function MenuPage() {
         tableId={tableId}
         restaurantId={restaurantId}
         showOrderListModal
-        storeImgUrl={storeImgUrl} // 💡 Pass store image URL to NavBar
+        storeImgUrl={storeImgUrl} 
       >
         {storeName}
       </NavBar>
@@ -149,7 +148,7 @@ export default function MenuPage() {
         onClose={() => setIsReviewModalOpen(false)}
         tableId={tableId || ""}
         restaurantId={restaurantId || ""}
-        menuItems={menuItems} // ✅ 메뉴 이미지 정보 전달
+        menuItems={menuItems} 
       />
 
 
@@ -287,12 +286,13 @@ export default function MenuPage() {
 
       <div className="fixed bottom-5 inset-x-4 flex justify-center z-20">
         <Link
-          href={`/restaurant/${restaurantId}/table/${tableId}/cart`}
-          className="flex items-center px-6 py-3 bg-[var(--color-primary)] text-white rounded-full shadow-lg active:scale-95 transition-transform no-highlight max-w-[calc(100%-32px)]"
-        >
+        href={`/restaurant/${restaurantId}/table/${tableId}/cart`}
+        className="flex items-center px-6 py-3 bg-[var(--color-primary)] text-white rounded-full shadow-lg active:scale-95 transition-transform no-highlight max-w-[calc(100%-32px)] relative"
+      >
+        <div className="relative mr-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 mr-2"
+            className="h-6 w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -304,13 +304,14 @@ export default function MenuPage() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          장바구니 보기
-          {/* {cartItemCount > 0 && (
-            <span className="ml-2 bg-red text-primary rounded-full h-6 w-6 flex items-center justify-center text-sm font-semibold">
-              {cartItemCount}
-            </span>
-          )} */}
-        </Link>
+          {cartItemCount > 0 && (
+          <span className="absolute -top-2 -left-4 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+  {cartItemCount}
+</span>
+          )}
+        </div>
+        장바구니 보기
+      </Link>
       </div>
     </div>
   );
