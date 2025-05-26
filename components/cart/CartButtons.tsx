@@ -50,11 +50,11 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "주문 생성 실패");
 
-      console.log("✅ 주문 준비 완료:", result.data.orderCode);
+      console.log(" 주문 준비 완료:", result.data.orderCode);
 
       const orderCode = result.data.orderCode;
 
-      // ✅ 현재 주문 저장
+      // 주문 코드와 총 금액을 로컬 스토리지에 저장
       localStorage.setItem(
         `nowOrder_${restaurantId}_${tableId}`,
         JSON.stringify({
@@ -63,14 +63,43 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
         })
       );
 
-      // ✅ 과거 주문 리스트에 추가
-      const historyKey = `order_${restaurantId}_${tableId}`;
-      const previous = JSON.parse(localStorage.getItem(historyKey) || "[]");
-      const updated = Array.from(new Set([...previous, orderCode]));
-      localStorage.setItem(historyKey, JSON.stringify(updated));
+try {
+  const accessKey = "omP8VZ6OUoecDaqF7fhi";
+  const secretKey = "vhA5Zlf4Gtb8WOHUFK38FGNvv1l563H4Z8zPl4Pl";
+  const basicAuth = btoa(`${accessKey}:${secretKey}`);
 
-      // 다음 페이지 이동 예시(callbackurl)
-      router.push(`/payment/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}`);
+  const pgResponse = await fetch("http://localhost:8082/prepare", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+      Authorization: `Basic ${basicAuth}`,
+    },
+    body: JSON.stringify({
+      orderId: orderCode,
+      merchantId: restaurantId,
+      amount: result.data.totalAmount,
+      currency: "KRW",
+    }),
+    credentials: "include",
+  });
+
+  const pgResult = await pgResponse.json();
+  if (!pgResponse.ok) throw new Error(pgResult.message || "결제 준비 실패");
+
+  console.log("💳 결제 준비 완료:", pgResult);
+
+  // ✅ callbackUrl 로 이동
+const callbackUrl = pgResult.data.callbackUrl || "/payment";
+router.push(`${callbackUrl}/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
+} catch (pgError) {
+  console.error("🚨 PG 연동 오류:", pgError);
+  alert("결제 준비 중 오류가 발생했습니다.");
+}finally {
+      setLoading(false);
+    }
+
+
+
     } catch (err) {
       console.error("🚨 주문 준비 중 오류:", err);
       alert("주문 처리에 실패했습니다.");

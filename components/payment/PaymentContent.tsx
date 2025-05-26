@@ -8,16 +8,17 @@ import { format } from "date-fns"; // 날짜 형식 포맷
 
 const todayStr = format(new Date(), "MM/dd"); // 예: "05/13"
 
-export default function PaymentContent({ orderId }: { orderId: string }) {
+export default function PaymentContent({ orderId, paymentId }: { orderId: string; paymentId: string }) {  
   const router = useRouter();
   const searchParams = useSearchParams();
   const restaurantId = searchParams.get("restaurantId");
   const tableId = searchParams.get("tableId");
+  
 
   const { items, totalAmount, clearCart } = useCart();
 
   const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wooricard" | "tosspay" | "kakaopay">("wooricard");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "WOORI_APP_CARD" | "tosspay" | "kakaopay">("WOORI_APP_CARD");
   const [formData, setFormData] = useState({
     cardNumber: "",
     expiryDate: "",
@@ -60,43 +61,43 @@ export default function PaymentContent({ orderId }: { orderId: string }) {
   };
 
   
-    const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProcessing(true);
-    setPaymentError(null);
+   const handlePayment = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (processing) return; 
+  setProcessing(true);
+  setPaymentError(null);
 
-    try {
-      // 💡 실제 결제 요청 (현재는 주석 처리)
-      /*
-      const payRes = await fetch("http://localhost:8080/api/v1/pg/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          merchantId: Number(restaurantId),
-          amount: totalAmount,
-          payMethod: paymentMethod,
-        }),
-      });
+  try {
+    if (!paymentId) throw new Error("paymentId가 없습니다.");
 
-      const payData = await payRes.json();
-      if (!payRes.ok) throw new Error(payData.message || "결제 요청 실패");
+    const res = await fetch("http://localhost:8082/method", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentId: Number(paymentId),
+        method: paymentMethod,
+      }),
+    });
 
-      //  결제 성공 시 리다이렉트 URL로 이동
-      window.location.href = payData.redirectUrl; // 예: "https://wooricard.com/..."
-      */
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "결제 수단 등록 실패");
 
-      // PG사로 결제 응답을 받으면면
-      router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}&processing=true`);
+   const paymentWindow = window.open(`http://localhost:8082${data.data.redirectUrl}`, "_blank");
 
-      //  장바구니 클리어
-     
-    } catch (error) {
-      console.error(error);
-      setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
-      setProcessing(false);
-    }
-  };
+// 3. 기존 창에서는 진행 중 화면으로 전환
+router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}&processing=true`);
+
+
+    // 선택적으로 장바구니 비우기
+    clearCart();
+
+  } catch (err) {
+    console.error("🚨 결제 요청 중 오류:", err);
+    setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
+    setProcessing(false);
+  }
+};
+
 
 
   return (
@@ -210,9 +211,9 @@ return (
               <input
                 type="radio"
                 name="paymentMethod"
-                value="wooricard"
-                checked={paymentMethod === "wooricard"}
-                onChange={() => setPaymentMethod("wooricard")}
+                value="WOORI_APP_CARD"
+                checked={paymentMethod === "WOORI_APP_CARD"}
+                onChange={() => setPaymentMethod("WOORI_APP_CARD")}
                 className="mr-3"
               />
               <div>
@@ -355,7 +356,7 @@ return (
         </form>
       )}
         {/*카드 마케팅*/}
-      {["wooricard", "tosspay", "kakaopay"].includes(paymentMethod) && (  
+      {["WOORI_APP_CARD", "tosspay", "kakaopay"].includes(paymentMethod) && (  
         <div>
           <div className="bg-[#FFF8E8] p-4 rounded mb-4 text-center flex items-center">
             <img
@@ -382,7 +383,7 @@ return (
           >
             {processing
               ? "처리 중..."
-              : `${paymentMethod === "wooricard"
+              : `${paymentMethod === "WOORI_APP_CARD"
                   ? "우리카드로 결제하기"
                   : paymentMethod === "tosspay"
                   ? "토스페이로 결제하기"
