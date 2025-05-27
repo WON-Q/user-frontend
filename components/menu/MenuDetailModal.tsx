@@ -24,7 +24,7 @@ export default function MenuDetailModal({
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
   const [totalPrice, setTotalPrice] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
-  const cartButtonRef = useRef<HTMLButtonElement>(null); // Ref for the cart button
+  const cartButtonRef = useRef<HTMLButtonElement>(null);
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -47,6 +47,8 @@ export default function MenuDetailModal({
 
   useEffect(() => {
     if (menu && isOpen) {
+      setQuantity(1); // Reset quantity to 1
+
       const initialOptions: SelectedOptions = {};
       let initialTotalPrice = menu.price;
 
@@ -61,10 +63,9 @@ export default function MenuDetailModal({
       }
 
       setSelectedOptions(initialOptions);
-      setTotalPrice(initialTotalPrice * quantity);
-      setQuantity(1);
+      setTotalPrice(initialTotalPrice); 
     }
-  }, [menu, isOpen]);
+  }, [menu?.id, isOpen]); 
 
   useEffect(() => {
     if (menu) {
@@ -86,7 +87,6 @@ export default function MenuDetailModal({
   const flyToCart = () => {
     const image = document.querySelector(".menu-preview-image") as HTMLElement;
     const cartButton = cartButtonRef.current;
-
     if (!image || !cartButton) return;
 
     const clone = image.cloneNode(true) as HTMLElement;
@@ -99,11 +99,7 @@ export default function MenuDetailModal({
     clone.style.width = `${imageRect.width}px`;
     clone.style.height = `${imageRect.height}px`;
     clone.style.zIndex = "1000";
-    clone.style.transition = `
-      transform 0.8s ease-in-out,
-      opacity 0.8s ease-in-out,
-      left 0.8s ease-in-out,
-      top 0.8s ease-in-out`;
+    clone.style.transition = `transform 0.8s ease-in-out, opacity 0.8s ease-in-out, left 0.8s ease-in-out, top 0.8s ease-in-out`;
     clone.style.pointerEvents = "none";
     clone.style.borderRadius = "12px";
     clone.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
@@ -139,8 +135,9 @@ export default function MenuDetailModal({
         }
       });
 
+       console.log("수량:", quantity);
       addItem(menu, quantity, optionsForCart, optionIdsForCart);
-      flyToCart(); // Trigger the animation
+      flyToCart();
 
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);

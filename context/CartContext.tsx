@@ -68,46 +68,61 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
     menuItem: MenuItem,
     quantity: number,
     options?: { [key: string]: string },
-    optionIds?: number[] // ✅ 추가
+    optionIds?: number[]
   ) => {
-    setItems(currentItems => {
-      const optionsKey = options ? JSON.stringify(options) : '';
-      const optionIdsKey = optionIds ? JSON.stringify(optionIds) : '';
+    setItems(prevItems => {
+      const normalizedOptions = options
+        ? Object.fromEntries(Object.entries(options).sort()) // Normalize and sort options
+        : {};
+      const sortedOptionIds = optionIds ? [...optionIds].sort() : []; // Sort option IDs
 
-      const existingItemIndex = currentItems.findIndex(item => 
+      const optionsKey = JSON.stringify(normalizedOptions);
+      const optionIdsKey = JSON.stringify(sortedOptionIds);
+
+      const existingItemIndex = prevItems.findIndex(item =>
         item.id === menuItem.id &&
-        JSON.stringify(item.options) === optionsKey &&
-        JSON.stringify(item.optionIds || []) === optionIdsKey
+        JSON.stringify(item.options ? Object.fromEntries(Object.entries(item.options).sort()) : {}) === optionsKey &&
+        JSON.stringify((item.optionIds || []).sort()) === optionIdsKey
       );
 
-      const optionTotalPrice = menuItem.options
-        ?.reduce((sum, optGroup) => {
-          const selectedOptionName = options?.[optGroup.title];
-          const selectedOption = optGroup.items.find(item => item.name === selectedOptionName);
-          return sum + (selectedOption?.price || 0);
-        }, 0) || 0;
+      const optionTotalPrice = menuItem.options?.reduce((sum, optGroup) => {
+        const selectedOptionName = options?.[optGroup.title];
+        const selectedOption = optGroup.items.find(item => item.name === selectedOptionName);
+        return sum + (selectedOption?.price || 0);
+      }, 0) || 0;
 
       const finalUnitPrice = menuItem.price + optionTotalPrice;
-      const totalPrice = finalUnitPrice * quantity;
+      const updatedItems = [...prevItems];
+
+          // ✅ 로그 출력
+    console.log("🛒 장바구니 담기 요청");
+    console.log("메뉴 ID:", menuItem.id);
+    console.log("메뉴 이름:", menuItem.name);
+    console.log("추가 수량:", quantity);
+    console.log("옵션:", normalizedOptions);
+    console.log("옵션 ID:", sortedOptionIds);
+    console.log("최종 단가 (옵션 포함):", finalUnitPrice);
+    console.log("기존 항목 인덱스:", existingItemIndex);
 
       if (existingItemIndex >= 0) {
-        const updatedItems = [...currentItems];
-        const item = updatedItems[existingItemIndex];
+        const item = { ...updatedItems[existingItemIndex] };
         item.quantity += quantity;
-        item.totalPrice = finalUnitPrice * item.quantity;
-        return updatedItems;
+        item.totalPrice = item.price * item.quantity; // ✅ Calculate total price using existing unit price
+        updatedItems[existingItemIndex] = item;
       } else {
-        return [...currentItems, {
+        updatedItems.push({
           id: menuItem.id,
           name: menuItem.name,
-          price: finalUnitPrice,
+          price: finalUnitPrice, // Unit price including options
           quantity,
-          options,
-          optionIds, // ✅ 저장
+          options: normalizedOptions,
+          optionIds: sortedOptionIds,
           image: menuItem.image,
-          totalPrice
-        }];
+          totalPrice: finalUnitPrice * quantity,
+        });
       }
+
+      return updatedItems;
     });
   };
 

@@ -70,7 +70,7 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
     try {
       if (!paymentId) throw new Error("paymentId가 없습니다.");
 
-      const res = await fetch("http://192.168.0.168:8082/method", {
+      const res = await fetch("http://localhost:8082/method", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,7 +85,7 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
 
 
       // 3. 기존 창에서는 진행 중 화면으로 전환
-      router.push(`http://192.168.0.168:8082${data.data.redirectUrl}`);
+      router.push(`http://localhost:8082${data.data.redirectUrl}`);
 
 
       // 선택적으로 장바구니 비우기
