@@ -87,7 +87,7 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
       // 3. 기존 창에서는 진행 중 화면으로 전환
       router.push(`http://localhost:8082${data.data.redirectUrl}`);
 
-
+      
       // 선택적으로 장바구니 비우기
       clearCart();
 

@@ -89,9 +89,8 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
 
         console.log("💳 결제 준비 완료:", pgResult);
 
-        // ✅ callbackUrl 로 이동
-        const callbackUrl = pgResult.data.callbackUrl || "/payment";
-        router.push(`${callbackUrl}/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
+       router.push(`/payment/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
+
       } catch (pgError) {
         console.error("🚨 PG 연동 오류:", pgError);
         alert("결제 준비 중 오류가 발생했습니다.");

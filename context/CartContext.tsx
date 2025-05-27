@@ -94,20 +94,12 @@ export function CartProvider({ children, restaurantId, tableId }: CartProviderPr
       const finalUnitPrice = menuItem.price + optionTotalPrice;
       const updatedItems = [...prevItems];
 
-          // ✅ 로그 출력
-    console.log("🛒 장바구니 담기 요청");
-    console.log("메뉴 ID:", menuItem.id);
-    console.log("메뉴 이름:", menuItem.name);
-    console.log("추가 수량:", quantity);
-    console.log("옵션:", normalizedOptions);
-    console.log("옵션 ID:", sortedOptionIds);
-    console.log("최종 단가 (옵션 포함):", finalUnitPrice);
-    console.log("기존 항목 인덱스:", existingItemIndex);
+
 
       if (existingItemIndex >= 0) {
         const item = { ...updatedItems[existingItemIndex] };
         item.quantity += quantity;
-        item.totalPrice = item.price * item.quantity; // ✅ Calculate total price using existing unit price
+        item.totalPrice = item.price * item.quantity; 
         updatedItems[existingItemIndex] = item;
       } else {
         updatedItems.push({
