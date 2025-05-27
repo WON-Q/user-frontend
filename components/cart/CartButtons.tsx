@@ -30,6 +30,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
 
       const requestBody = {
         tableId: Number(tableId),
+        merchantId: restaurantId,
         menus,
         paymentMethod: "CARD",
       };

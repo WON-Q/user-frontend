@@ -12,7 +12,7 @@ export default function PaymentCompletePage() {
   const [restaurantId, setRestaurantId] = useState("1");
   const [tableId, setTableId] = useState("1");
   const [totalAmount, setTotalAmount] = useState(0);
-  const [confirmedOrderCode, setConfirmedOrderCode] = useState(""); // ✅ 추가
+  const [confirmedOrderCode, setConfirmedOrderCode] = useState(""); 
 
   useEffect(() => {
     const _orderId = searchParams.get("orderId");
@@ -31,16 +31,37 @@ export default function PaymentCompletePage() {
     console.log("🧩 key:", key);
     console.log("🧩 orderId:", _orderId);
     console.log("🧩 raw:", raw);
+if (raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    setTotalAmount(parsed.totalAmount || 0);
+    setConfirmedOrderCode(parsed.orderCode || ""); 
 
-    if (raw) {
+    // ✅ 1. orderCode 누적 저장
+    const completedKey = `order_${_restaurantId}_${_tableId}`;
+    const previous = localStorage.getItem(completedKey);
+    let orderList: string[] = [];
+    if (previous) {
       try {
-        const parsed = JSON.parse(raw);
-        setTotalAmount(parsed.totalAmount || 0);
-        setConfirmedOrderCode(parsed.orderCode || ""); // ✅ orderCode도 저장
-        localStorage.removeItem(`cart_${_restaurantId}_${_tableId}`);
+        orderList = JSON.parse(previous);
       } catch (e) {
-        console.error("🚨 로컬스토리지 파싱 오류:", e);
+        console.warn("이전 주문 목록 파싱 실패. 초기화함.");
       }
+    }
+
+    // 중복 방지 후 저장
+    const newOrderCode = parsed.orderCode;
+    if (newOrderCode && !orderList.includes(newOrderCode)) {
+      orderList.push(newOrderCode);
+      localStorage.setItem(completedKey, JSON.stringify(orderList));
+    }
+
+    // ✅ 2. 카트 비우기
+    localStorage.removeItem(`cart_${_restaurantId}_${_tableId}`);
+
+  } catch (e) {
+    console.error("🚨 로컬스토리지 파싱 오류:", e);
+  }
     }
   }, [searchParams]);
 
@@ -58,7 +79,7 @@ export default function PaymentCompletePage() {
             <div className="flex justify-between">
               <span className="text-[#767676]">주문번호</span>
               <span className="font-medium text-[#1A1A1A]">
-                {confirmedOrderCode || orderId} {/* ✅ 우선순위: 로컬스토리지 값 */}
+                {confirmedOrderCode || orderId} 
               </span>
             </div>
             <div className="flex justify-between">
