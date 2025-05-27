@@ -1,0 +1,62 @@
+name: 원큐오더 유저 클라이언트 개발 환경 배포 파이프라인
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-and-run-locally:
+    runs-on: self-hosted
+
+    steps:
+      - name: Runner 준비중...
+        run: echo "Runner is ready."
+
+      - name: 디스크 공간 확인 (정리 전)
+        run: df -h
+
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
+
+      - name: Docker 시스템 정리
+        run: |
+          sudo docker system prune -af
+          sudo docker volume prune -f
+          sudo docker builder prune -af
+
+      - name: 디스크 공간 확인 (정리 후)
+        run: df -h
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Set ENV file
+        run: |
+          echo "${{ secrets.ENV }}" > .env
+          
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: 기존 컨테이너 및 이미지 삭제
+        run: |
+          sudo docker stop client || true
+          sudo docker rm client || true
+          sudo docker rmi dev-client || true
+
+      - name: 도커 이미지 빌드
+        run: |
+          sudo docker build -t dev-client .
+
+      - name: 도커 컨테이너 실행
+        run: |
+          sudo docker run -d --name client -p 3000:3000 dev-client
