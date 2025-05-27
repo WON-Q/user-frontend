@@ -59,7 +59,7 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
 
           const allMenus = await Promise.all(
             orderCodes.map(async (code) => {
-              const res = await fetch(`http://localhost:8080/api/v1/orders/code/${code}`);
+              const res = await fetch(`http://192.168.0.168:8080/api/v1/orders/code/${code}`);
               const json = await res.json();
               const order = json.data;
 
@@ -99,17 +99,17 @@ export default function ReviewListModal({ isOpen, onClose, tableId, restaurantId
     }
   }, [isOpen, restaurantId, tableId, menuItems]);
 
-const handleReviewClick = (menu: ReviewItem) => {
- 
+  const handleReviewClick = (menu: ReviewItem) => {
 
-  // 2. 리뷰 작성 페이지로 이동
-  const encodedName = encodeURIComponent(menu.name);
-  const encodedImage = encodeURIComponent(menu.image ?? "");
 
-  router.push(
-    `/restaurant/${restaurantId}/review/${menu.id}?tableId=${tableId}&name=${encodedName}&image=${encodedImage}`
-  );
-};
+    // 2. 리뷰 작성 페이지로 이동
+    const encodedName = encodeURIComponent(menu.name);
+    const encodedImage = encodeURIComponent(menu.image ?? "");
+
+    router.push(
+      `/restaurant/${restaurantId}/review/${menu.id}?tableId=${tableId}&name=${encodedName}&image=${encodedImage}`
+    );
+  };
 
 
   if (!isOpen || !mounted) return null;
@@ -168,38 +168,37 @@ const handleReviewClick = (menu: ReviewItem) => {
                   )}
                   <div className="flex-1 overflow-hidden">
                     <p className="text-base font-semibold text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis font-[Pretendard]">
-                    {order.name}
+                      {order.name}
                     </p>
                   </div>
-               <button
-  onClick={() => handleReviewClick(order)}
-  disabled={order.reviewed}
-  className={`w-[100px] px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow flex items-center justify-center gap-1 ${
-    order.reviewed
-      ? "bg-orange-100 text-orange-700 cursor-default"
-      : "bg-orange-500 text-white hover:bg-orange-600"
-  }`}
->
-  {order.reviewed ? (
-    <>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4 text-orange-600"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-      <path
-          fillRule="evenodd"
-          d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
-          clipRule="evenodd"
-        />
-      </svg>
-      리뷰 완료
-    </>
-  ) : (
-    "리뷰 달기"
-  )}
-</button>
+                  <button
+                    onClick={() => handleReviewClick(order)}
+                    disabled={order.reviewed}
+                    className={`w-[100px] px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 shadow flex items-center justify-center gap-1 ${order.reviewed
+                        ? "bg-orange-100 text-orange-700 cursor-default"
+                        : "bg-orange-500 text-white hover:bg-orange-600"
+                      }`}
+                  >
+                    {order.reviewed ? (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-orange-600"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        리뷰 완료
+                      </>
+                    ) : (
+                      "리뷰 달기"
+                    )}
+                  </button>
                 </li>
               ))}
             </ul>

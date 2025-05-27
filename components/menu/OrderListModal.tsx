@@ -58,7 +58,7 @@ export default function OrderListModal({ isOpen, onClose, tableId, restaurantId 
 
         Promise.all(
           orderCodes.map(async (code) => {
-            const res = await fetch(`http://localhost:8080/api/v1/orders/code/${code}`);
+            const res = await fetch(`http://192.168.0.168:8080/api/v1/orders/code/${code}`);
             const json = await res.json();
             const order = json.data;
 

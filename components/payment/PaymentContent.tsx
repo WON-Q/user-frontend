@@ -8,12 +8,12 @@ import { format } from "date-fns"; // 날짜 형식 포맷
 
 const todayStr = format(new Date(), "MM/dd"); // 예: "05/13"
 
-export default function PaymentContent({ orderId, paymentId }: { orderId: string; paymentId: string }) {  
+export default function PaymentContent({ orderId, paymentId }: { orderId: string; paymentId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const restaurantId = searchParams.get("restaurantId");
   const tableId = searchParams.get("tableId");
-  
+
 
   const { items, totalAmount, clearCart } = useCart();
 
@@ -60,43 +60,43 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
     setFormData((prev) => ({ ...prev, [name]: formatted }));
   };
 
-  
-   const handlePayment = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (processing) return; 
-  setProcessing(true);
-  setPaymentError(null);
 
-  try {
-    if (!paymentId) throw new Error("paymentId가 없습니다.");
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (processing) return;
+    setProcessing(true);
+    setPaymentError(null);
 
-    const res = await fetch("http://localhost:8082/method", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        paymentId: Number(paymentId),
-        method: paymentMethod,
-      }),
-    });
+    try {
+      if (!paymentId) throw new Error("paymentId가 없습니다.");
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "결제 수단 등록 실패");
+      const res = await fetch("http://192.168.0.168:8082/method", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentId: Number(paymentId),
+          method: paymentMethod,
+        }),
+      });
 
-   const paymentWindow = window.open(`http://localhost:8082${data.data.redirectUrl}`, "_blank");
-
-// 3. 기존 창에서는 진행 중 화면으로 전환
-router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}&processing=true`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "결제 수단 등록 실패");
 
 
-    // 선택적으로 장바구니 비우기
-    clearCart();
 
-  } catch (err) {
-    console.error("🚨 결제 요청 중 오류:", err);
-    setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
-    setProcessing(false);
-  }
-};
+      // 3. 기존 창에서는 진행 중 화면으로 전환
+      router.push(`http://192.168.0.168:8082${data.data.redirectUrl}`);
+
+
+      // 선택적으로 장바구니 비우기
+      clearCart();
+
+    } catch (err) {
+      console.error("🚨 결제 요청 중 오류:", err);
+      setPaymentError("결제 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setProcessing(false);
+    }
+  };
 
 
 
@@ -118,60 +118,58 @@ router.push(`/payment/processing?orderId=${orderId}&restaurantId=${restaurantId}
         </div>
       </div>
 
-{/* 혜택 요약 + 펼쳐지는 리스트 포함 */}
-<div className="mb-4 px-4 py-3 bg-white border border-[#FF6B35] rounded-xl shadow-sm transition-all">
-  <div className="flex justify-between items-center mb-2">
-    <span className="text-sm font-semibold text-[#1A1A1A]"> 오늘의 혜택</span>
-    <button
-  onClick={() => setBenefitOpen((prev) => !prev)}
-  className={`text-xs px-3 py-1 bg-[#FF6B35] text-white rounded-full shadow-sm hover:bg-[#e0521c] transition ${
-    !benefitOpen ? "animate-bounce" : ""
-  }`}
->
-  원큐 클릭
-</button>
-  </div>
-  <p className="text-[12px] text-gray-500">5월 3주</p>
+      {/* 혜택 요약 + 펼쳐지는 리스트 포함 */}
+      <div className="mb-4 px-4 py-3 bg-white border border-[#FF6B35] rounded-xl shadow-sm transition-all">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-semibold text-[#1A1A1A]"> 오늘의 혜택</span>
+          <button
+            onClick={() => setBenefitOpen((prev) => !prev)}
+            className={`text-xs px-3 py-1 bg-[#FF6B35] text-white rounded-full shadow-sm hover:bg-[#e0521c] transition ${!benefitOpen ? "animate-bounce" : ""
+              }`}
+          >
+            원큐 클릭
+          </button>
+        </div>
+        <p className="text-[12px] text-gray-500">5월 3주</p>
 
-{benefitOpen && (
-  <div className="mt-4 p-3 bg-[#FFF8E8] rounded-lg animate-fade-slide-in">
-    <div className="grid grid-cols-4 gap-2">
-      {[
-        { day: "일", date: "05/18", benefit: "500원 할인" },
-        { day: "월", date: "05/19", benefit: "우리페이 적립 2%" },
-        { day: "화", date: "05/20", benefit: "카카오페이 500P" },
-        { day: "수", date: "05/21", benefit: "신규가입 10% 할인" },
-        { day: "목", date: "05/22", benefit: "배달비 0원" },
-        { day: "금", date: "05/23", benefit: "쿠폰 증정" },
-        { day: "토", date: "05/24", benefit: "1000P 즉시지급" },
-      ].map(({ day, date, benefit }) => {
-const isToday = todayStr === date;
-return (
-  <div
-    key={date}
-    className={`relative p-3 text-xs rounded-xl border text-center flex flex-col items-center justify-center transition-all duration-300 ${
-      isToday
-        ? "bg-[#FFE6D5] border-[#FF8A4C] shadow-md ring-1 ring-[#FFB68E]"
-        : "bg-white border border-[#E0E0E0]"
-    }`}
-  >
-    {isToday && (
-      <div className="absolute top-1 right-1 text-green-600 text-sm font-semibold">✔</div>
-    )}
-    <p className="font-medium text-[#1A1A1A]">{day}</p>
-    <p className="text-[10px] text-gray-500">{date}</p>
-    <p className="mt-1 text-[11px] font-semibold text-[#FF6B35] text-center leading-snug">
-      {benefit}
-    </p>
-  </div>
-);
-      })}
-      <div className="p-3" />
-    </div>
-  </div>
-)}
+        {benefitOpen && (
+          <div className="mt-4 p-3 bg-[#FFF8E8] rounded-lg animate-fade-slide-in">
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { day: "일", date: "05/18", benefit: "500원 할인" },
+                { day: "월", date: "05/19", benefit: "우리페이 적립 2%" },
+                { day: "화", date: "05/20", benefit: "카카오페이 500P" },
+                { day: "수", date: "05/21", benefit: "신규가입 10% 할인" },
+                { day: "목", date: "05/22", benefit: "배달비 0원" },
+                { day: "금", date: "05/23", benefit: "쿠폰 증정" },
+                { day: "토", date: "05/24", benefit: "1000P 즉시지급" },
+              ].map(({ day, date, benefit }) => {
+                const isToday = todayStr === date;
+                return (
+                  <div
+                    key={date}
+                    className={`relative p-3 text-xs rounded-xl border text-center flex flex-col items-center justify-center transition-all duration-300 ${isToday
+                      ? "bg-[#FFE6D5] border-[#FF8A4C] shadow-md ring-1 ring-[#FFB68E]"
+                      : "bg-white border border-[#E0E0E0]"
+                      }`}
+                  >
+                    {isToday && (
+                      <div className="absolute top-1 right-1 text-green-600 text-sm font-semibold">✔</div>
+                    )}
+                    <p className="font-medium text-[#1A1A1A]">{day}</p>
+                    <p className="text-[10px] text-gray-500">{date}</p>
+                    <p className="mt-1 text-[11px] font-semibold text-[#FF6B35] text-center leading-snug">
+                      {benefit}
+                    </p>
+                  </div>
+                );
+              })}
+              <div className="p-3" />
+            </div>
+          </div>
+        )}
 
-</div>
+      </div>
 
 
 
@@ -347,16 +345,15 @@ return (
           <button
             type="submit"
             disabled={processing || timeLeft <= 0}
-            className={`w-full py-3 rounded-md font-medium text-white transition-all duration-200 ${
-              processing || timeLeft <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#FF6B35] hover:bg-[#C75000] shadow-md"
-            }`}
+            className={`w-full py-3 rounded-md font-medium text-white transition-all duration-200 ${processing || timeLeft <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#FF6B35] hover:bg-[#C75000] shadow-md"
+              }`}
           >
             {processing ? "처리 중..." : `${totalAmount.toLocaleString()}원 결제하기`}
           </button>
         </form>
       )}
-        {/*카드 마케팅*/}
-      {["WOORI_APP_CARD", "tosspay", "kakaopay"].includes(paymentMethod) && (  
+      {/*카드 마케팅*/}
+      {["WOORI_APP_CARD", "tosspay", "kakaopay"].includes(paymentMethod) && (
         <div>
           <div className="bg-[#FFF8E8] p-4 rounded mb-4 text-center flex items-center">
             <img
@@ -377,15 +374,14 @@ return (
           <button
             onClick={handlePayment}
             disabled={processing || timeLeft <= 0}
-            className={`w-full py-3 rounded-md font-medium text-white transition-all duration-200 ${
-              processing || timeLeft <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#FF6B35] hover:bg-[#C75000] shadow-md"
-            }`}
+            className={`w-full py-3 rounded-md font-medium text-white transition-all duration-200 ${processing || timeLeft <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#FF6B35] hover:bg-[#C75000] shadow-md"
+              }`}
           >
             {processing
               ? "처리 중..."
               : `${paymentMethod === "WOORI_APP_CARD"
-                  ? "우리카드로 결제하기"
-                  : paymentMethod === "tosspay"
+                ? "우리카드로 결제하기"
+                : paymentMethod === "tosspay"
                   ? "토스페이로 결제하기"
                   : "카카오페이로 결제하기"}`}
           </button>

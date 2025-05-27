@@ -36,12 +36,12 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
       };
 
       console.log("📤 주문 준비 요청:");
-      console.log("➡️ URL:", "http://localhost:8080/api/v1/orders/prepare");
+      console.log("➡️ URL:", "http://192.168.0.168:8080/api/v1/orders/prepare");
       console.log("➡️ Method:", "POST");
       console.log("➡️ Headers:", { "Content-Type": "application/json;charset=UTF-8" });
       console.log("➡️ Body:", requestBody);
 
-      const response = await fetch("http://localhost:8080/api/v1/orders/prepare", {
+      const response = await fetch("http://192.168.0.168:8080/api/v1/orders/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json;charset=UTF-8" },
         body: JSON.stringify(requestBody),
@@ -64,40 +64,40 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
         })
       );
 
-try {
-  const accessKey = "omP8VZ6OUoecDaqF7fhi";
-  const secretKey = "vhA5Zlf4Gtb8WOHUFK38FGNvv1l563H4Z8zPl4Pl";
-  const basicAuth = btoa(`${accessKey}:${secretKey}`);
+      try {
+        const accessKey = "QOtB07frJ4K2UoqhH89s";
+        const secretKey = "AUBXZwZ8K8eQ6fOyU44RCju7LDcBTFajw26Aza8p";
+        const basicAuth = btoa(`${accessKey}:${secretKey}`);
 
-  const pgResponse = await fetch("http://localhost:8082/prepare", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json;charset=UTF-8",
-      Authorization: `Basic ${basicAuth}`,
-    },
-    body: JSON.stringify({
-      orderId: orderCode,
-      merchantId: restaurantId,
-      amount: result.data.totalAmount,
-      currency: "KRW",
-    }),
-    credentials: "include",
-  });
+        const pgResponse = await fetch("http://192.168.0.168:8082/prepare", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            Authorization: `Basic ${basicAuth}`,
+          },
+          body: JSON.stringify({
+            orderId: orderCode,
+            merchantId: restaurantId,
+            amount: result.data.totalAmount,
+            currency: "KRW",
+          }),
+          credentials: "include",
+        });
 
-  const pgResult = await pgResponse.json();
-  if (!pgResponse.ok) throw new Error(pgResult.message || "결제 준비 실패");
+        const pgResult = await pgResponse.json();
+        if (!pgResponse.ok) throw new Error(pgResult.message || "결제 준비 실패");
 
-  console.log("💳 결제 준비 완료:", pgResult);
+        console.log("💳 결제 준비 완료:", pgResult);
 
-  // ✅ callbackUrl 로 이동
-const callbackUrl = pgResult.data.callbackUrl || "/payment";
-router.push(`${callbackUrl}/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
-} catch (pgError) {
-  console.error("🚨 PG 연동 오류:", pgError);
-  alert("결제 준비 중 오류가 발생했습니다.");
-}finally {
-      setLoading(false);
-    }
+        // ✅ callbackUrl 로 이동
+        const callbackUrl = pgResult.data.callbackUrl || "/payment";
+        router.push(`${callbackUrl}/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
+      } catch (pgError) {
+        console.error("🚨 PG 연동 오류:", pgError);
+        alert("결제 준비 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
 
 
 
