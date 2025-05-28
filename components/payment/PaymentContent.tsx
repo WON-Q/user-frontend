@@ -70,7 +70,7 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
     try {
       if (!paymentId) throw new Error("paymentId가 없습니다.");
 
-      const res = await fetch("http://localhost:8082/method", {
+      const res = await fetch("http://192.168.0.168:8082/method", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,12 +82,29 @@ export default function PaymentContent({ orderId, paymentId }: { orderId: string
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "결제 수단 등록 실패");
 
+      if (restaurantId && tableId && orderId) {
+        const key = `order_${restaurantId}_${tableId}`;
+        const existing = localStorage.getItem(key);
+        let orderList: string[] = [];
 
+        if (existing) {
+          try {
+            orderList = JSON.parse(existing);
+            // 중복 방지 (선택)
+            if (orderList.includes(orderId)) return;
+          } catch (e) {
+            console.error("localStorage JSON parse error", e);
+          }
+        }
+
+        orderList.push(orderId);
+        localStorage.setItem(key, JSON.stringify(orderList));
+      }
 
       // 3. 기존 창에서는 진행 중 화면으로 전환
-      router.push(`http://localhost:8082${data.data.redirectUrl}`);
+      router.push(`http://192.168.0.168:8082${data.data.redirectUrl}`);
 
-      
+
       // 선택적으로 장바구니 비우기
       clearCart();
 

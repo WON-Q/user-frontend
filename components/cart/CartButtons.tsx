@@ -36,12 +36,12 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
       };
 
       console.log("📤 주문 준비 요청:");
-      console.log("➡️ URL:", "http://localhost:8080/api/v1/orders/prepare");
+      console.log("➡️ URL:", "http://192.168.0.168:8080/api/v1/orders/prepare");
       console.log("➡️ Method:", "POST");
       console.log("➡️ Headers:", { "Content-Type": "application/json;charset=UTF-8" });
       console.log("➡️ Body:", requestBody);
 
-      const response = await fetch("http://localhost:8080/api/v1/orders/prepare", {
+      const response = await fetch("http://192.168.0.168:8080/api/v1/orders/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json;charset=UTF-8" },
         body: JSON.stringify(requestBody),
@@ -69,7 +69,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
         const secretKey = "AUBXZwZ8K8eQ6fOyU44RCju7LDcBTFajw26Aza8p";
         const basicAuth = btoa(`${accessKey}:${secretKey}`);
 
-        const pgResponse = await fetch("http://localhost:8082/prepare", {
+        const pgResponse = await fetch("http://192.168.0.168:8082/prepare", {
           method: "POST",
           headers: {
             "Content-Type": "application/json;charset=UTF-8",
@@ -78,8 +78,9 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
           body: JSON.stringify({
             orderId: orderCode,
             merchantId: restaurantId,
-            amount: result.data.totalAmout,
-            currecy: "KRW",
+            tableId: Number(tableId),
+            amount: result.data.totalAmount,
+            currency: "KRW",
           }),
           credentials: "include",
         });
@@ -89,7 +90,7 @@ export default function CartButtons({ restaurantId, tableId }: CartButtonsProps)
 
         console.log("💳 결제 준비 완료:", pgResult);
 
-       router.push(`/payment/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
+        router.push(`/payment/${orderCode}?restaurantId=${restaurantId}&tableId=${tableId}&paymentId=${pgResult.data.paymentId}`);
 
       } catch (pgError) {
         console.error("🚨 PG 연동 오류:", pgError);

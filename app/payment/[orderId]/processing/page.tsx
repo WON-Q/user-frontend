@@ -1,30 +1,32 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
 
 export default function PaymentProcessingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const params = useParams();
 
-  const orderId = searchParams.get("orderId");
+  const orderId = Array.isArray(params.orderId)
+    ? params.orderId[0]
+    : params.orderId ?? "";
+
   const restaurantId = searchParams.get("restaurantId");
-  const processing = searchParams.get("processing");
   const tableId = searchParams.get("tableId");
-  const orderCode = orderId; //  orderId가 곧 orderCode라면 이렇게 사용
+  const orderCode = orderId;
 
   useEffect(() => {
-    if (!orderId || !restaurantId || !processing || !tableId) {
+    if (!orderId || !restaurantId || !tableId) {
       console.error("Missing required query parameters.");
       return;
     }
 
-    //  백엔드에 결제 검증 요청 보내기
     const verifyPayment = async () => {
       try {
         const response = await fetch(
-          `localhost:8080/api/orders/code/${orderCode}/verify`,
+          `http://192.168.0.168:8080/api/v1/orders/code/${orderCode}/verify`,
           {
             method: "POST",
             headers: {
@@ -39,14 +41,15 @@ export default function PaymentProcessingPage() {
         }
 
         const result = await response.json();
+        console.log(result);
 
-        if (result?.data?.paymentStatus === "SUCCEEDED") {
+        if (result?.data?.paymentStatus === "COMPLETED") {
           router.push(
-            `/payment/complete?orderId=${orderId}&restaurantId=${restaurantId}&tableId=${tableId}`
+            `/payment/${orderId}/complete?restaurantId=${restaurantId}&tableId=${tableId}`
           );
         } else {
           console.log("Payment not succeeded yet. Retrying in 5s...");
-          setTimeout(verifyPayment, 5000); // 재시도
+          setTimeout(verifyPayment, 5000);
         }
       } catch (error) {
         console.error("Payment verification error:", error);
@@ -54,7 +57,7 @@ export default function PaymentProcessingPage() {
     };
 
     verifyPayment();
-  }, [orderId, restaurantId, tableId, processing, router, orderCode]);
+  }, [orderId, restaurantId, tableId, router, orderCode]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6">

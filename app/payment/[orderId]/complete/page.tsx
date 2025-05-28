@@ -1,23 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function PaymentCompletePage() {
   const searchParams = useSearchParams();
+  const params = useParams();
 
   const [orderId, setOrderId] = useState("UNKNOWN-ORDER");
   const [restaurantId, setRestaurantId] = useState("1");
   const [tableId, setTableId] = useState("1");
   const [totalAmount, setTotalAmount] = useState(0);
-  const [confirmedOrderCode, setConfirmedOrderCode] = useState(""); 
+  const [confirmedOrderCode, setConfirmedOrderCode] = useState("");
 
   useEffect(() => {
-    const _orderId = searchParams.get("orderId");
+    const _orderId = Array.isArray(params.orderId)
+      ? params.orderId[0]
+      : params.orderId ?? "";
     const _restaurantId = searchParams.get("restaurantId");
     const _tableId = searchParams.get("tableId");
+
+    console.log("✅ [URL에서 추출한 값]");
+    console.log("orderId:", _orderId);
+    console.log("restaurantId:", _restaurantId);
+    console.log("tableId:", _tableId);
 
     if (!_orderId || !_restaurantId || !_tableId) return;
 
@@ -28,42 +36,21 @@ export default function PaymentCompletePage() {
     const key = `nowOrder_${_restaurantId}_${_tableId}`;
     const raw = localStorage.getItem(key);
 
-    console.log("🧩 key:", key);
-    console.log("🧩 orderId:", _orderId);
-    console.log("🧩 raw:", raw);
-if (raw) {
-  try {
-    const parsed = JSON.parse(raw);
-    setTotalAmount(parsed.totalAmount || 0);
-    setConfirmedOrderCode(parsed.orderCode || ""); 
+    console.log("🔍 localStorage key:", key);
+    console.log("📦 raw value:", raw);
 
-    // ✅ 1. orderCode 누적 저장
-    const completedKey = `order_${_restaurantId}_${_tableId}`;
-    const previous = localStorage.getItem(completedKey);
-    let orderList: string[] = [];
-    if (previous) {
+    if (raw) {
       try {
-        orderList = JSON.parse(previous);
+        const parsed = JSON.parse(raw);
+        console.log("🧾 parsed object:", parsed);
+
+        setTotalAmount(parsed.totalAmount || 0);
+        setConfirmedOrderCode(parsed.orderCode || _orderId);
       } catch (e) {
-        console.warn("이전 주문 목록 파싱 실패. 초기화함.");
+        console.error("🚨 로컬스토리지 파싱 오류:", e);
       }
     }
-
-    // 중복 방지 후 저장
-    const newOrderCode = parsed.orderCode;
-    if (newOrderCode && !orderList.includes(newOrderCode)) {
-      orderList.push(newOrderCode);
-      localStorage.setItem(completedKey, JSON.stringify(orderList));
-    }
-
-    // ✅ 2. 카트 비우기
-    localStorage.removeItem(`cart_${_restaurantId}_${_tableId}`);
-
-  } catch (e) {
-    console.error("🚨 로컬스토리지 파싱 오류:", e);
-  }
-    }
-  }, [searchParams]);
+  }, [params.orderId, searchParams]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8F8F8] p-4">
@@ -79,7 +66,7 @@ if (raw) {
             <div className="flex justify-between">
               <span className="text-[#767676]">주문번호</span>
               <span className="font-medium text-[#1A1A1A]">
-                {confirmedOrderCode || orderId} 
+                {confirmedOrderCode || orderId}
               </span>
             </div>
             <div className="flex justify-between">
@@ -94,17 +81,18 @@ if (raw) {
         {/* 우리카드 홍보 영역 */}
         <div className="rounded-xl bg-[#FFF8E8] border border-[#FFD4A3] p-4 flex items-center space-x-4 shadow-sm">
           <img
-            src="/images/우리카드.png" // 💡 S3나 public 폴더 이미지 경로
+            src="/images/우리카드.png"
             alt="우리카드 신규 발급"
             className="w-16 h-16 rounded-lg object-contain"
           />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-[#FF6B35] mb-1">우리카드의정석 EVERY DISCOUNT</p>
+            <p className="text-sm font-semibold text-[#FF6B35] mb-1">
+              우리카드의정석 EVERY DISCOUNT
+            </p>
             <p className="text-xs text-[#4A4A4A]">
               온라인 간편결제 2% 할인, 첫 결제 시 1,000P 지급 🎁
             </p>
           </div>
-          
         </div>
 
         <div className="space-y-3">

@@ -11,7 +11,7 @@ export default function PaymentPage() {
   const orderId = typeof params.orderId === "string" ? params.orderId : Array.isArray(params.orderId) ? params.orderId[0] : "";
   const restaurantId = searchParams.get("restaurantId") || "1";
   const tableId = searchParams.get("tableId") || "1";
-   const paymentId = searchParams.get("paymentId") || "";
+  const paymentId = searchParams.get("paymentId") || "";
 
   return (
     <CartProvider restaurantId={restaurantId} tableId={tableId}>
